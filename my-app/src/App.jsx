@@ -32,15 +32,6 @@ function App() {
     if (time > 0) setIsRunning(true)
   }
 
-  const handleTimeStart = (totalSeconds) => {
-    const secs = Number(totalSeconds) || 0;
-    if (secs > 0){
-      setTime(secs);
-      setIsRunning(true)
-    }
-  }
-
-
   // parameters(effect: imperative function that returns a cleanup function, dependencies)
 
   useEffect(() => {
@@ -65,8 +56,13 @@ function App() {
   return (
     <>
       <Header />
+
       <main className='app-layout'>
+        
+
         <section className='panel-right'>
+          
+
           {/* <form action = "submit-time" onSubmit={handleSubmit}>
             <label className = "custom-field">
               <input 
@@ -81,15 +77,13 @@ function App() {
           <button type="submit">Start!</button>
         </form> */}
         
-          <Time 
-            time = {time}
-            isRunning = {isRunning}
-            onStart = {(totalSeconds)=>{
-              setTime(totalSeconds)
-              setIsRunning(true)
-            }
-          }
-            />
+        <Time 
+          time = {time}
+          />
+        
+
+        
+    
         </section>
       </main>
     </>
