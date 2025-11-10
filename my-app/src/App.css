@@ -1,0 +1,433 @@
+@import "https://unpkg.com/open-props";
+
+html, body #root {
+  height: 100%;
+}
+#root {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 2rem;
+  text-align: center;
+}
+
+.logo {
+  height: 6em;
+  padding: 1.5em;
+  will-change: filter;
+  transition: filter 300ms;
+}
+.logo:hover {
+  filter: drop-shadow(0 0 2em #646cffaa);
+}
+.logo.react:hover {
+  filter: drop-shadow(0 0 2em #61dafbaa);
+}
+
+@keyframes logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  a:nth-of-type(2) .logo {
+    animation: logo-spin infinite 20s linear;
+  }
+}
+
+.card {
+  padding: 2em;
+}
+
+.read-the-docs {
+  color: #888;
+}
+
+body {
+  margin: 0;
+  background-color: indianred;
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: center;
+  min-height: 100vh;
+  min-width: 100vw;
+  overflow-y: auto;
+
+}
+
+.app-layout {
+  display: flex;
+  gap: 24px;
+  justify-content: center;
+  align-items: flex-start;
+  flex-wrap: wrap;          /* stacks on small screens */
+  max-width: 1000px;
+  padding: 24px 16px;
+  margin: 0 auto;
+}
+
+/* Left and right columns */
+.panel-left,
+.panel-right {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.panel-left {
+  flex: 0 0 260px;          /* fixed-ish column for the jar art */
+}
+
+.panel-right {
+  flex: 1 1 420px;          /* grows/shrinks for content */
+  min-width: 280px;
+  max-width: 520px;
+}
+
+@media (max-width: 700px){
+  .app-layout{
+    flex-direction: column;
+    align-items: center;
+  }
+}
+
+:root {
+  --color: var(--yellow-5);
+  --shadow: var(--yellow-8);
+  --glare: hsl(0 0% 100% / 0.75);
+  --font-size: var(--font-size-fluid-3);
+  --transition: 0.2s;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+a {
+  --padding: var(--size-2);
+  padding: var(--padding);
+  border-radius: var(--size-4);
+  text-decoration: none;
+  color: transparent;
+  position: relative;
+  transition: background 0.2s;
+}
+
+a:hover {
+  background: var(--gray-8);
+}
+
+span {
+  display: inline-block;
+  font-size: calc(var(--font-size) * 1.5);
+  font-weight: var(--font-weight-9);
+  transition: all 0.2s;
+  text-decoration: none;
+  text-shadow:
+    calc(var(--hover) * (var(--font-size) * -0)) calc(var(--hover) * (var(--font-size) * 0)) var(--shadow),
+    calc(var(--hover) * (var(--font-size) * -0.02)) calc(var(--hover) * (var(--font-size) * 0.02)) var(--shadow),
+    calc(var(--hover) * (var(--font-size) * -0.04)) calc(var(--hover) * (var(--font-size) * 0.04)) var(--shadow),
+    calc(var(--hover) * (var(--font-size) * -0.06)) calc(var(--hover) * (var(--font-size) * 0.06)) var(--shadow),
+    calc(var(--hover) * (var(--font-size) * -0.08)) calc(var(--hover) * (var(--font-size) * 0.08)) var(--shadow),
+    calc(var(--hover) * (var(--font-size) * -0.10)) calc(var(--hover) * (var(--font-size) * 0.10)) var(--shadow);
+/*     calc(var(--hover) * -2px) calc(var(--hover) * 2px) var(--shadow),
+    calc(var(--hover) * -3px) calc(var(--hover) * 3px) var(--shadow),
+    calc(var(--hover) * -4px) calc(var(--hover) * 4px) var(--shadow), */
+/*     calc(var(--hover) * -5px) calc(var(--hover) * 5px) var(--shadow); */
+  transform: translate(calc(var(--hover) * (var(--font-size) * 0.10)), calc(var(--hover) * (var(--font-size) * -0.10)));
+}
+
+span:last-of-type {
+  position: absolute;
+  inset: var(--padding);
+  background: linear-gradient(
+    108deg,
+    transparent 0 55%,
+    var(--glare) 55% 60%,
+    transparent 60% 70%,
+    var(--glare) 70% 85%,
+    transparent 85%
+  ) calc(var(--pos) * -200%) 0% / 200% 100%, var(--color);
+  -webkit-background-clip: text;
+  color: transparent;
+  z-index: 2;
+  text-shadow: none;
+  transform: translate(calc(var(--hover) * (var(--font-size) * 0.10)), calc(var(--hover) * (var(--font-size) * -0.10)));
+}
+
+span:last-of-type {
+  transition: transform 0.2s, background-position 0s;
+}
+
+a:hover span:last-of-type {
+  transition: transform 0.2s, background-position calc(var(--hover) * 1.5s) calc(var(--hover) * 0.25s);
+}
+
+a {
+  --hover: 0.4;
+  --pos: 0;
+}
+
+a:hover {
+  --hover: 1;
+  --pos: 1;
+}
+
+a:active {
+  --hover: 0;
+}
+
+a:active span:last-of-type {
+  --hover: 0;
+  --pos: 1;
+}
+
+a svg {
+	position: absolute;
+	z-index: 3;
+	width: calc(var(--font-size) * 0.5);
+	aspect-ratio: 1;
+}
+
+a svg path {
+	fill: var(--glare);
+}
+
+/* Animation for sparkles */
+
+a:hover svg {
+	animation: sparkle 0.75s calc((var(--delay-step) * var(--d)) * 1s) both;
+}
+
+@keyframes sparkle {
+	50% {
+		transform: translate(-50%, -50%) scale(var(--s, 1));
+	}
+}
+
+a svg {
+	--delay-step: 0.15;
+	top: calc(var(--y, 50) * 1%);
+	left:  calc(var(--x, 0) * 1%);
+	transform: translate(-50%, -50%) scale(0);
+}
+
+a svg:nth-of-type(1) {
+	--x: 0;
+	--y: 20;
+	--s: 1.1;
+	--d: 1;
+}
+
+a svg:nth-of-type(2) {
+	--x: 15;
+	--y: 80;
+	--s: 1.25;
+	--d: 2;
+}
+
+a svg:nth-of-type(3) {
+	--x: 45;
+	--y: 40;
+	--s: 1.1;
+	--d: 3;
+}
+
+a svg:nth-of-type(4) {
+	--x: 75;
+	--y: 60;
+	--s: 0.9;
+	--d: 2;
+}
+
+a svg:nth-of-type(5) {
+	--x: 100;
+	--y: 30;
+	--s: 0.8;
+	--d: 4;
+}
+
+.header {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 11px;
+  padding: 16px 20px; 
+  top: 0;
+  z-index: 1000;
+  position: sticky;
+  background: rgba(20,16,36,0.35);
+  box-shadow: 0px 1px 3px 0px rgba(0, 0, 0, 0.10), 0px 1px 2px 0px rgba(0, 0, 0, 0.06);
+  border-radius: 20px;
+}
+
+.header h1 {
+  margin: 0;
+  line-height: 1.1;
+}
+
+h1 .faizey {
+  color:lightpink;
+  font-size:150%;
+}
+
+h1 .pomodoro{
+  color:lightsalmon;
+  font-size:150%;
+}
+
+
+.time-form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  padding-bottom: 50px;
+}
+
+label {
+  color: lightsalmon;
+  font-size: 1.2em;
+  margin-bottom: 8px;
+}
+
+.custom-field {
+  position : relative;
+  font-size : 14px;
+  padding-top: 20px;
+  margin-bottom: 5px;
+}
+
+.custom-field input {
+  border-radius: 3px;
+  border: none;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background: #f6e3ba;
+  padding: 12px;
+  outline: none;
+  margin-bottom: 16px;
+
+  color: #c2656d;
+  font-size : 14px;
+}
+
+.custom-field .placeholder {
+  position: absolute;
+  left: 12px;
+  top: calc(50% + 2px);
+  transform: translateY(-50%);
+  transition: 
+    top 0.3s ease,
+    font-size 0.3s ease,
+    color 0.3s ease;
+}
+
+.custom-field input:valid + .placeholder,
+.custom-field input:focus + .placeholder {
+  top: 10px;
+  font-size: 13px;
+  color: #ffefcb;
+}
+
+button {
+  box-shadow: 0px 1px 2px 0px rgba(0, 0, 0, 0.05);
+  background-color: #df8a76;
+  margin:auto
+}
+
+
+.phrase {
+  margin-top: 30px;
+  font-size: 1.5rem;
+  text-align: center;
+  color: #ea5ded;
+}
+
+.show-time {
+  display: flex;
+  justify-content: center;  /* centers the items horizontally */
+  align-items: center;      /* Centers vertically */
+  gap: 2px;
+
+  border-radius: 15px;
+  width: 200px;
+  padding: 0px 15px;
+  margin-top: -30px;
+  scale: 150%;
+}
+
+
+
+.time {
+  color: #ffefcb;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 15px;
+  width: 200px;
+  padding: 0px 15px;
+  scale: 160%;
+  gap: 0.001px;
+  font-size: 50px;
+  font-weight: 650;
+  position: relative;
+  left: -10px;
+}
+
+.time .hours,.minutes,.seconds {
+  color: #ffefcb;
+  font-size: 50px;
+  font-weight: 600;
+  height: 50px;
+  max-width: 70px;
+  background: transparent;
+  border: none;
+  outline: none;
+  font-family: inherit;
+  text-align: center;
+}
+
+.time .hours{
+  margin-right: -12px;
+}
+
+.time input::placeholder {
+  color: #ffefcb;
+  opacity: 1;
+  font-weight: 650;
+}
+
+/* For Firefox */
+.time input::-moz-placeholder {
+  color: #ffefcb;
+  opacity: 1;
+  font-size: 300%;
+  font-weight: 650;
+}
+
+.button-container {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  margin-top: 15px;
+}
+
+.time-button {
+  scale: 120%;
+  height: 40px;
+  width: 80px;
+  max-height: 60px;
+  max-width: 100px;
+  border-radius: 15px;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+  color: #ffefcb;
+}
+
