@@ -253,31 +253,14 @@ a svg:nth-of-type(5) {
 
 .header {
   display: flex;
+  gap: 25px;
   justify-content: center;
   align-items: center;
-  gap: 11px;
-  padding: 16px 20px; 
-  top: 0;
-  z-index: 1000;
-  position: sticky;
-  background: rgba(20,16,36,0.35);
-  box-shadow: 0px 1px 3px 0px rgba(0, 0, 0, 0.10), 0px 1px 2px 0px rgba(0, 0, 0, 0.06);
-  border-radius: 20px;
 }
 
 .header h1 {
   margin: 0;
   line-height: 1.1;
-}
-
-h1 .faizey {
-  color:lightpink;
-  font-size:150%;
-}
-
-h1 .pomodoro{
-  color:lightsalmon;
-  font-size:150%;
 }
 
 
@@ -350,18 +333,40 @@ button {
 }
 
 .show-time {
+  color: #ffefcb;
   display: flex;
   justify-content: center;  /* centers the items horizontally */
   align-items: center;      /* Centers vertically */
   gap: 2px;
 
+  font-size: inherit;
+  font-weight: 650;
+  font-family: inherit;
+  text-align: center;
+
+  /* border: black 2px solid; */
   border-radius: 15px;
-  width: 200px;
+  width: 275px;
   padding: 0px 15px;
-  margin-top: -30px;
   scale: 150%;
+
 }
 
+/* Make the displayed time match the input sizing so layout doesn't shift
+   when switching from inputs to the static display. Remove default h1
+   margins and ensure consistent height/centering. */
+.show-time h1 {
+  line-height: 1;            /* tighter line height to center text */
+  height: 50px;             /* match .time input height */
+  width: 70px;              /* match .time input width */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 52px;          /* match inputs' visual size */
+  margin-bottom: 50px;
+  margin-top: 50px;
+  
+}
 
 
 .time {
@@ -370,7 +375,7 @@ button {
   justify-content: center;
   align-items: center;
   border-radius: 15px;
-  width: 200px;
+  width: 350px;
   padding: 0px 15px;
   scale: 160%;
   gap: 0.001px;
@@ -378,23 +383,21 @@ button {
   font-weight: 650;
   position: relative;
   left: -10px;
+  /* border: black 2px solid; */
 }
 
 .time .hours,.minutes,.seconds {
   color: #ffefcb;
   font-size: 50px;
-  font-weight: 600;
+  font-weight: 650;
   height: 50px;
-  max-width: 70px;
   background: transparent;
   border: none;
   outline: none;
   font-family: inherit;
   text-align: center;
-}
-
-.time .hours{
-  margin-right: -12px;
+  width: 65px;
+  
 }
 
 .time input::placeholder {
@@ -410,6 +413,18 @@ button {
   font-size: 300%;
   font-weight: 650;
 }
+
+/* Hide the spinner arrows */
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type="number"] {
+  -moz-appearance: textfield;
+}
+
 
 .button-container {
   width: 100%;
@@ -431,3 +446,5 @@ button {
   color: #ffefcb;
 }
 
+
+.sound:hover {color: #3e8e41}
