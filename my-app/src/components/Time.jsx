@@ -94,8 +94,8 @@ export default function Time({ isRunning, setIsRunning, isPause, isSoundOn, isRe
     isRunning ? (
       <>
         <div className= 'show-time'>
-          <h1>{String(Math.floor(time / 3600)).padStart(2,0)}:</h1>
-          <h1>{String(Math.floor((time % 3600) /60)).padStart(2,0)}:</h1>
+          <h1>{String(Math.floor(time / 3600)).padStart(2,0)}</h1>:
+          <h1>{String(Math.floor((time % 3600) /60)).padStart(2,0)}</h1>:
           <h1>{String(time % 60).padStart(2,0)}</h1>
         </div>
       </>

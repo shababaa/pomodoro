@@ -268,8 +268,8 @@ a svg:nth-of-type(5) {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 20px;
-  padding-bottom: 50px;
+  gap: 40px;
+  padding-bottom: 35px;
 }
 
 label {
@@ -337,9 +337,8 @@ button {
   display: flex;
   justify-content: center;  /* centers the items horizontally */
   align-items: center;      /* Centers vertically */
-  gap: 2px;
 
-  font-size: inherit;
+  font-size: 52px;
   font-weight: 650;
   font-family: inherit;
   text-align: center;
@@ -360,8 +359,8 @@ button {
   height: 50px;             /* match .time input height */
   width: 70px;              /* match .time input width */
   display: inline-flex;
-  align-items: center;
   justify-content: center;
+  font-weight: 650;
   font-size: 52px;          /* match inputs' visual size */
   margin-bottom: 50px;
   margin-top: 50px;
@@ -375,14 +374,10 @@ button {
   justify-content: center;
   align-items: center;
   border-radius: 15px;
-  width: 350px;
   padding: 0px 15px;
   scale: 160%;
-  gap: 0.001px;
   font-size: 50px;
   font-weight: 650;
-  position: relative;
-  left: -10px;
   /* border: black 2px solid; */
 }
 
@@ -396,7 +391,7 @@ button {
   outline: none;
   font-family: inherit;
   text-align: center;
-  width: 65px;
+  width: 70px;
   
 }
 
