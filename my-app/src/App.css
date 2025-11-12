@@ -321,6 +321,7 @@ label {
 button {
   box-shadow: 0px 1px 2px 0px rgba(0, 0, 0, 0.05);
   background-color: #df8a76;
+  font-weight: 800;
   margin:auto
 }
 
@@ -335,7 +336,7 @@ button {
 .show-time {
   color: #ffefcb;
   display: flex;
-  justify-content: center;  /* centers the items horizontally */
+  justify-content: space-evenly;  /* centers the items horizontally */
   align-items: center;      /* Centers vertically */
 
   font-size: 52px;
@@ -426,6 +427,7 @@ input[type="number"] {
   display: flex;
   justify-content: center;
   margin-top: 15px;
+  
 }
 
 .time-button {
@@ -434,12 +436,29 @@ input[type="number"] {
   width: 80px;
   max-height: 60px;
   max-width: 100px;
-  border-radius: 15px;
+  border-radius: 20px;
   border: none;
   cursor: pointer;
-  font-weight: 600;
+  font-weight: 800;
   color: #ffefcb;
 }
 
+.add-five {
+  border-radius: 20px;
+  border: none;
+  outline: none;
+}
 
-.sound:hover {color: #3e8e41}
+.add-ten {
+  border-radius: 20px;
+  border: none;
+  outline: none;
+}
+
+.bottom-bar {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 25px;
+}
+
