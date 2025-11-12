@@ -3,9 +3,8 @@ import '../App.css'
 import sound from "../assets/sounds/simplenoise.mp3"
 import Pause from './Pause';
 
-export default function Time({ isRunning, setIsRunning, isPause, isSoundOn, isReset, setIsReset}) {
+export default function Time({ isRunning, setIsRunning, isPause, isSoundOn, isReset, setIsReset, time, setTime}) {
 
-  const [time, setTime] = useState(0); 
   const [prevTime, setPrevTime] = useState(0)
   
   const isPauseRef = useRef(isPause)
