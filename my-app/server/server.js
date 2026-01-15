@@ -10,9 +10,26 @@ app.use(express.json())
 
 const isProd = process.env.NODE_ENV === "production"
 
+const allowedOrigins = (process.env.CORS_ORIGIN || "")
+    .split(",")
+    .map((origin) => origin.trim())
+    .filter(Boolean)
+
+const isAllowedOrigin = (origin) => {
+    if (!origin) return true
+    if (allowedOrigins.includes(origin)) return true
+    // Allow Vercel preview/prod domains for the frontend project.
+    return /^https:\/\/pomodoro-fronte.*\.vercel\.app$/.test(origin)
+}
+
 const corsOptions = {
     origin: isProd
-        ? (process.env.CORS_ORIGIN ? process.env.CORS_ORIGIN.split(',') : [])
+        ? (origin, callback) => {
+            if (isAllowedOrigin(origin)) {
+                return callback(null, true)
+            }
+            return callback(new Error("Not allowed by CORS"))
+        }
         : ["http://localhost:5173"],
     credentials: true
 }
