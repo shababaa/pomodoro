@@ -69,7 +69,7 @@ export default function Register({ apiBase }) {
                     value = {password}
                     onChange={(e) => setPassword(e.target.value)}
                     />
-                    <span className = "placeholder">Password</span>
+                    <span className = "placeholder password-placeholder">Password</span>
                 </label>
                 {error && (
                     <p style={{ color: "red", marginTop: 8 }}>

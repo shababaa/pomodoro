@@ -673,11 +673,20 @@ label {
     color 0.3s ease;
 }
 
+.custom-field .password-placeholder {
+  top: calc(50% - 6px);
+}
+
 .custom-field input:valid + .placeholder,
 .custom-field input:focus + .placeholder {
   top: 10px;
   font-size: 13px;
   color: #ffefcb;
+}
+
+.custom-field input:valid + .password-placeholder,
+.custom-field input:focus + .password-placeholder {
+  top: 6px;
 }
 
 button {
