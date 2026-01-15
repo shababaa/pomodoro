@@ -1,6 +1,7 @@
 import express from 'express'
 import cors from 'cors'
 import session from "express-session"
+import MySQLStoreFactory from "express-mysql-session"
 
 import { getUsers, getUser, createUser, getProjectsByUserId, createProjectByUserId, deleteProjectById, getSessionDataById, createSession } from './demo_db_connection.js'
 
@@ -53,10 +54,23 @@ function toBuffer16(value) {
 
 app.set("trust proxy", 1)
 
+const MySQLStore = MySQLStoreFactory(session)
+const sessionStore = new MySQLStore({
+    host: process.env.MYSQL_HOST,
+    user: process.env.MYSQL_USER,
+    password: process.env.MYSQL_PASSWORD,
+    database: process.env.MYSQL_DATABASE,
+    port: Number(process.env.MYSQL_PORT || 3306),
+    clearExpired: true,
+    createDatabaseTable: true,
+    tableName: "user_sessions"
+})
+
 app.use(session({
     secret: process.env.SESSION_SECRET || "dev_secret",
     resave: false,
     saveUninitialized: false,
+    store: sessionStore,
     cookie: {
         httpOnly: true,
         sameSite: isProd ? "none" : "lax",
