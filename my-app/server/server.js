@@ -8,8 +8,10 @@ import { getUsers, getUser, createUser, getProjectsByUserId, createProjectByUser
 const app = express()
 app.use(express.json())
 
+const isProd = process.env.NODE_ENV === "production"
+
 const corsOptions = {
-    origin: process.env.NODE_ENV === 'production' 
+    origin: isProd
         ? (process.env.CORS_ORIGIN ? process.env.CORS_ORIGIN.split(',') : [])
         : ["http://localhost:5173"],
     credentials: true
@@ -32,14 +34,16 @@ function toBuffer16(value) {
 
 
 
+app.set("trust proxy", 1)
+
 app.use(session({
     secret: process.env.SESSION_SECRET || "dev_secret",
     resave: false,
     saveUninitialized: false,
     cookie: {
         httpOnly: true,
-        sameSite: "lax",
-        secure: false
+        sameSite: isProd ? "none" : "lax",
+        secure: isProd
     }
 }))
 
