@@ -7,12 +7,14 @@ export default function Register({ apiBase }) {
     const [username, setUsername] = useState("")
     const [password, setPassword] = useState("")
     const [error, setError] = useState("")
+    const [success, setSuccess] = useState(false)
     const navigate = useNavigate();
 
 
     async function handleSubmit(e) {
         e.preventDefault()
         setError("")
+        setSuccess(false)
 
         try {
             const res = await fetch(`${apiBase}/auth/register`, {
@@ -30,6 +32,8 @@ export default function Register({ apiBase }) {
             }
 
             console.log("Registered successfully:", data)
+            setSuccess(true)
+            setTimeout(() => navigate("/login"), 1200)
         } catch (err) {
             console.error(err)
             setError("Network Error")
@@ -71,6 +75,11 @@ export default function Register({ apiBase }) {
                     />
                     <span className = "placeholder password-placeholder">Password</span>
                 </label>
+                {success && (
+                    <p style={{ color: "#ffefcb", marginTop: 8 }}>
+                        Account created. Redirecting to login...
+                    </p>
+                )}
                 {error && (
                     <p style={{ color: "red", marginTop: 8 }}>
                         {error}
