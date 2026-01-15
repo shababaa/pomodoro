@@ -15,7 +15,7 @@ import axios from 'axios'
 import ProtectedRoute from './pages/ProtectedRoute'
 import Projects from './components/Projects'
 
-const API_BASE = "http://localhost:5000"
+const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:5000"
 
 
 
@@ -40,7 +40,7 @@ function App() {
     //temporary  
     const fetchAPI = async () => {
       try {
-      const response = await axios.get("http://localhost:5000/users")
+      const response = await axios.get(`${API_BASE}/users`)
       console.log(response)
       if (!response.ok) {
           throw new Error(`HTTP error. status: ${response.status}`)

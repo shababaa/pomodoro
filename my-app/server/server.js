@@ -9,7 +9,9 @@ const app = express()
 app.use(express.json())
 
 const corsOptions = {
-    origin: ["http://localhost:5173"],
+    origin: process.env.NODE_ENV === 'production' 
+        ? (process.env.CORS_ORIGIN ? process.env.CORS_ORIGIN.split(',') : [])
+        : ["http://localhost:5173"],
     credentials: true
 }
 app.use(cors(corsOptions))
