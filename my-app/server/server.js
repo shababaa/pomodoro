@@ -55,6 +55,7 @@ function toBuffer16(value) {
 app.set("trust proxy", 1)
 
 const MySQLStore = MySQLStoreFactory(session)
+const sessionTableName = "user_sessions_store"
 const sessionStore = new MySQLStore({
     host: process.env.MYSQL_HOST,
     user: process.env.MYSQL_USER,
@@ -63,7 +64,15 @@ const sessionStore = new MySQLStore({
     port: Number(process.env.MYSQL_PORT || 3306),
     clearExpired: true,
     createDatabaseTable: true,
-    tableName: "user_sessions_store"
+    tableName: sessionTableName,
+    schema: {
+        tableName: sessionTableName,
+        columnNames: {
+            session_id: "session_id",
+            expires: "expires",
+            data: "data"
+        }
+    }
 })
 
 app.use(session({
