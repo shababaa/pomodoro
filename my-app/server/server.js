@@ -63,7 +63,7 @@ const sessionStore = new MySQLStore({
     port: Number(process.env.MYSQL_PORT || 3306),
     clearExpired: true,
     createDatabaseTable: true,
-    tableName: "user_sessions"
+    tableName: "user_sessions_store"
 })
 
 app.use(session({
