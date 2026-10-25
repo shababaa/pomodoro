@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { FaVolumeHigh } from "react-icons/fa6";
 import { FaPause, FaPlay } from "react-icons/fa6";
 import { GrPowerReset } from "react-icons/gr";
@@ -15,6 +14,8 @@ export default function Header({ isRunning, isPause, setIsPause, isSoundOn, setI
   }
 
   const handleResetClick = () => {
+    // A later Begin should start counting. Pause used to stay on after reset.
+    setIsPause(false)
     setIsReset((prev) => !prev)
   }
 
@@ -29,11 +30,11 @@ export default function Header({ isRunning, isPause, setIsPause, isSoundOn, setI
           +5
         </button>
       )}
-      {isSoundOn ? <FaVolumeHigh className="sound" size={50} color="#ffefcb" onClick={handleVolumeClick}/>: 
-        <IoVolumeMute className='sound' size = {50} color='#ffefcb' onClick={handleVolumeClick}/>}
-      {isRunning && !isPause && <FaPause className='pause' size={50} color="#ffefcb" onClick={handlePauseClick}/>}
-      {isRunning && isPause && <FaPlay className='pause' size={50} color="#ffefcb" onClick={handlePauseClick}/>}
-      {isRunning && <GrPowerReset className='reset' size={50} color="#ffefcb" fontWeight={600} onClick={handleResetClick}/>}
+      {isSoundOn ? <FaVolumeHigh className="sound" size={36} color="#3d2a22" onClick={handleVolumeClick}/>: 
+        <IoVolumeMute className='sound' size = {36} color='#3d2a22' onClick={handleVolumeClick}/>}
+      {isRunning && !isPause && <FaPause className='pause' size={34} color="#3d2a22" onClick={handlePauseClick}/>}
+      {isRunning && isPause && <FaPlay className='pause' size={34} color="#3d2a22" onClick={handlePauseClick}/>}
+      {isRunning && <GrPowerReset className='reset' size={32} color="#3d2a22" fontWeight={600} onClick={handleResetClick}/>}
       {isRunning && (
         <button 
           className='add-time-button'

@@ -11,6 +11,7 @@ export default function Projects({ apiBase, onProjectSelect, selectedProjectId, 
     const [openProjectId, setOpenProjectId] = useState(null)
     const [sessionsByProject, setSessionsByProject] = useState({})
     const [isExpanded, setIsExpanded] = useState(true)
+    const [open, setOpen] = useState(false)
     const inputRef = useRef(null)
     const prevProjectsRef = useRef([])
     const newProjectIdsRef = useRef(new Set())
@@ -87,6 +88,15 @@ export default function Projects({ apiBase, onProjectSelect, selectedProjectId, 
             inputRef.current.focus()
         }
     }, [showInput])
+
+    useEffect(() => {
+        if (!open) return
+        const onKey = (e) => {
+            if (e.key === 'Escape') setOpen(false)
+        }
+        window.addEventListener('keydown', onKey)
+        return () => window.removeEventListener('keydown', onKey)
+    }, [open])
 
     async function handleSubmit(e) {
         e.preventDefault()
@@ -174,7 +184,25 @@ export default function Projects({ apiBase, onProjectSelect, selectedProjectId, 
 
     
     return (
-        <div className='projects-sidebar'>
+        <>
+        {open && (
+            <button
+                type="button"
+                className="projects-backdrop"
+                aria-label="Close projects"
+                onClick={() => setOpen(false)}
+            />
+        )}
+        <div className={`projects-drawer${open ? ' is-open' : ''}`}>
+            <button
+                type="button"
+                className="projects-tab"
+                aria-expanded={open}
+                onClick={() => setOpen((prev) => !prev)}
+            >
+                Projects
+            </button>
+        <div className='projects-panel'>
             <div className='projects-sidebar__header'>
               <button
                 type='button'
@@ -223,8 +251,6 @@ export default function Projects({ apiBase, onProjectSelect, selectedProjectId, 
                             newProjectIdsRef.current.delete(obj.projectId)
                         }}
                     >
-                        {console.log(obj.id)}
-
                         <div
                             className='project-line__header'
                             onMouseEnter={() => setHoveredProjectId(obj.projectId)}
@@ -275,5 +301,7 @@ export default function Projects({ apiBase, onProjectSelect, selectedProjectId, 
             )}
            
         </div>
+        </div>
+        </>
     )
 }
