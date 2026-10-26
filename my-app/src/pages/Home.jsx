@@ -1,8 +1,9 @@
-import React, { useEffect, useState } from "react"
+import React, { useCallback, useEffect, useState } from "react"
 import Projects from "../components/Projects"
 import Title from "../components/Title"
 import Time from "../components/Time"
 import Header from "../components/Header"
+import Sky from "../components/Sky"
 
 
 export default function Home({ apiBase }) {
@@ -14,7 +15,14 @@ export default function Home({ apiBase }) {
     const [selectedProjectId, setSelectedProjectId] = useState(null)
     const [activeSessionProjectId, setActiveSessionProjectId] = useState(null)
     const [refreshSessionsTrigger, setRefreshSessionsTrigger] = useState(0)
-  const [addTimeHandler, setAddTimeHandler] = useState(null)
+    const [focusProgress, setFocusProgress] = useState({ elapsedMs: 0, phase: 'idle', stage: 0 })
+
+    const handleFocusProgress = useCallback((next) => {
+        setFocusProgress((prev) => {
+            if (prev.phase === next.phase && prev.elapsedMs === next.elapsedMs && prev.stage === next.stage) return prev
+            return next
+        })
+    }, [])
 
     useEffect(() => {
         async function checkAuth() {
@@ -53,7 +61,8 @@ export default function Home({ apiBase }) {
     }
 
     return (
-        <>
+        <div className="home-shell">
+            <Sky stage={focusProgress.stage} phase={focusProgress.phase} />
             <Projects 
                 apiBase={apiBase} 
                 onProjectSelect={setSelectedProjectId} 
@@ -63,7 +72,7 @@ export default function Home({ apiBase }) {
             />
             <Title />
             <main className='app-layout'>
-                <section className='panel-right'>   
+                <section className='panel-right cozy-stage'>   
                     <Time 
                         isRunning={isRunning} 
                         setIsRunning={setIsRunning} 
@@ -75,7 +84,7 @@ export default function Home({ apiBase }) {
                         apiBase={apiBase}
                         onSessionStart={handleSessionStart}
                         onSessionFinish={handleSessionFinish}
-                    onAddTimeReady={(fn) => setAddTimeHandler(() => fn)} // store function, not execute
+                        onFocusProgress={handleFocusProgress}
                     />
                 <Header 
                     isRunning={isRunning} 
@@ -84,16 +93,12 @@ export default function Home({ apiBase }) {
                     isSoundOn={isSoundOn} 
                     setIsSoundOn={setIsSoundOn} 
                     setIsReset = {setIsReset}
-                    onAddTime={addTimeHandler}
                 />
                 </section>
             </main>
-            <div style={{ maxWidth: 600, margin: "40px auto", fontFamily: "sans-serif" }}>
-                <p>You are logged in</p>
-                <button onClick = {handleLogout} className = "logout" style={{ marginTop: 16, padding: "8px 16px"}}>
-                    Logout
-                </button>
-            </div>
-        </>
+            <button type="button" onClick={handleLogout} className="logout-quiet">
+                Log out
+            </button>
+        </div>
     )
 }
