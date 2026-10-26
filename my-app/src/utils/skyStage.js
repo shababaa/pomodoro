@@ -4,13 +4,17 @@ export function isNightHour(hour) {
 }
 
 /**
- * How grown-in the sky is, from a quiet start to a full scene.
- * Stages land at about 3, 10, and 20 minutes of real study time.
+ * How grown-in the sky is for the timer that was set.
+ * The scene steps in thirds of that length: a 1 minute timer
+ * updates every 20 seconds, a 15 minute timer every 5 minutes.
+ * Stage 3 is the full scene, reached as that timer completes.
  */
-export function skyStage(elapsedMs) {
-  const minutes = elapsedMs / 60000
-  if (minutes >= 20) return 3
-  if (minutes >= 10) return 2
-  if (minutes >= 3) return 1
+export function skyStage(elapsedMs, durationMs) {
+  const elapsed = Math.floor(elapsedMs)
+  const duration = Math.floor(durationMs)
+  if (!(duration > 0) || !(elapsed > 0)) return 0
+  if (elapsed >= duration) return 3
+  if (elapsed * 3 >= duration * 2) return 2
+  if (elapsed * 3 >= duration) return 1
   return 0
 }

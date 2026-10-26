@@ -1,13 +1,31 @@
-import { useEffect, useState, useRef, useCallback } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import '../App.css'
 import sound from "../assets/sounds/simplenoise.mp3"
 import Pause from './Pause';
+import DurationPicker from './DurationPicker'
 import { remainingWholeSeconds } from '../utils/timerClock'
+import { skyStage } from '../utils/skyStage'
 
-export default function Time({ isRunning, setIsRunning, isPause, isSoundOn, isReset, setIsReset, selectedProjectId, apiBase, onSessionStart, onSessionFinish, onAddTimeReady, onFocusProgress}) {
+function clockFromSeconds(totalSeconds) {
+  const total = Math.max(0, Math.floor(totalSeconds))
+  return {
+    hours: String(Math.floor(total / 3600)).padStart(2, '0'),
+    minutes: String(Math.floor((total % 3600) / 60)).padStart(2, '0'),
+    seconds: String(total % 60).padStart(2, '0'),
+  }
+}
+
+function secondsFromClock(clock) {
+  return (parseInt(clock.hours, 10) || 0) * 3600
+    + (parseInt(clock.minutes, 10) || 0) * 60
+    + (parseInt(clock.seconds, 10) || 0)
+}
+
+export default function Time({ isRunning, setIsRunning, isPause, isSoundOn, isReset, setIsReset, selectedProjectId, apiBase, onSessionStart, onSessionFinish, onFocusProgress}) {
 
   const [time, setTime] = useState(0); 
   const [prevTime, setPrevTime] = useState(0)
+  const [clock, setClock] = useState({ hours: '', minutes: '', seconds: '' })
   const [showBreakOptions, setShowBreakOptions] = useState(false)
   const [isBreakMode, setIsBreakMode] = useState(false)
   const [optionsType, setOptionsType] = useState('after-study') // 'after-study' or 'after-break'
@@ -32,6 +50,9 @@ export default function Time({ isRunning, setIsRunning, isPause, isSoundOn, isRe
   // Completed study time for this session, in ms. The sky keeps this
   // through a break and drops it when the session is reset or finished.
   const sessionStudyMsRef = useRef(0)
+  // Fullest sky reached in this session. A finished block stays grown-in
+  // through a break or another study block, until reset or finish.
+  const earnedStageRef = useRef(0)
 
   const armDeadline = (totalSeconds) => {
     hasFinishedRef.current = false
@@ -51,18 +72,14 @@ export default function Time({ isRunning, setIsRunning, isPause, isSoundOn, isRe
     }
   }, [isBreakMode])
 
-  const handleInput = (e) => {
-    if (e.target.value.length >2) {
-      e.target.value = e.target.value.slice(0,2)
-    }
+  const setClockPart = (key) => (event) => {
+    const next = event.target.value.replace(/\D/g, '').slice(0, 2)
+    setClock((prev) => ({ ...prev, [key]: next }))
   }
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    const hours = parseInt(e.target.hours.value) || 0;
-    const minutes = parseInt(e.target.minutes.value) || 0;
-    const seconds = parseInt(e.target.seconds.value) || 0;
-    const totalSeconds = hours*3600 + minutes*60 + seconds
+    const totalSeconds = secondsFromClock(clock)
     
     if (isBreakModeRef.current) {
       // Starting a break timer
@@ -117,6 +134,7 @@ export default function Time({ isRunning, setIsRunning, isPause, isSoundOn, isRe
     setTime(0)
     setPrevTime(0)
     initialDurationRef.current = 0
+    setClock({ hours: '', minutes: '', seconds: '' })
   }
 
   const handleContinueStudying = () => {
@@ -128,6 +146,7 @@ export default function Time({ isRunning, setIsRunning, isPause, isSoundOn, isRe
     setTime(0)
     setPrevTime(0)
     initialDurationRef.current = 0 // Reset the initial duration
+    setClock({ hours: '', minutes: '', seconds: '' })
   }
 
   const handleFinishSession = async () => {
@@ -137,6 +156,7 @@ export default function Time({ isRunning, setIsRunning, isPause, isSoundOn, isRe
     const studySeconds = sessionStudyTime
     const breakSeconds = sessionBreakTime
     sessionStudyMsRef.current = 0
+    earnedStageRef.current = 0
     setSessionStudyTime(0)
     setSessionBreakTime(0)
     // Create session with accumulated study and break times
@@ -151,6 +171,7 @@ export default function Time({ isRunning, setIsRunning, isPause, isSoundOn, isRe
     // Return to normal timer input
     setTime(0)
     setPrevTime(0)
+    setClock({ hours: '', minutes: '', seconds: '' })
   }
 
   const disableWheel = (e) => e.preventDefault();
@@ -161,28 +182,6 @@ export default function Time({ isRunning, setIsRunning, isPause, isSoundOn, isRe
       played.catch(() => {})
     }
   }
-
-  const handleAddTime = useCallback((minutes) => {
-    const addedMs = minutes * 60 * 1000
-    // Also update initialDurationRef if it's a study timer (not break)
-    if (!isBreakModeRef.current) {
-      initialDurationRef.current += minutes * 60
-    }
-    if (endTimeRef.current != null) {
-      endTimeRef.current += addedMs
-      setTime(remainingWholeSeconds(endTimeRef.current, Date.now()))
-    } else {
-      remainingMsRef.current += addedMs
-      setTime(Math.ceil(remainingMsRef.current / 1000))
-    }
-  }, [])
-
-  // Expose handleAddTime to parent (Header) so buttons can adjust time
-  useEffect(() => {
-    if (onAddTimeReady) {
-      onAddTimeReady(handleAddTime)
-    }
-  }, [onAddTimeReady, handleAddTime])
 
   useEffect(() => {
     // update Ref whenever prop changes
@@ -200,6 +199,8 @@ export default function Time({ isRunning, setIsRunning, isPause, isSoundOn, isRe
       remainingMsRef.current = 0
       hasFinishedRef.current = false
       sessionStudyMsRef.current = 0
+      earnedStageRef.current = 0
+      setClock(clockFromSeconds(prevTime))
       setTime(prevTime);
       setPrevTime(prevTime)
       setIsRunning(false)
@@ -268,6 +269,7 @@ export default function Time({ isRunning, setIsRunning, isPause, isSoundOn, isRe
       } else {
         const studyDuration = initialDurationRef.current
         sessionStudyMsRef.current += studyDuration * 1000
+        earnedStageRef.current = 3
         setSessionStudyTime(prev => prev + studyDuration)
         setOptionsType('after-study')
         setShowBreakOptions(true)
@@ -319,22 +321,25 @@ export default function Time({ isRunning, setIsRunning, isPause, isSoundOn, isRe
 
     const report = () => {
       let segmentMs = 0
-      if (!isBreakModeRef.current && isRunningRef.current) {
-        const plannedMs = initialDurationRef.current * 1000
+      const plannedMs = initialDurationRef.current * 1000
+      const studyRunning = !isBreakModeRef.current && isRunningRef.current
+      if (studyRunning) {
         const remainingMs = endTimeRef.current != null
           ? Math.max(0, endTimeRef.current - Date.now())
           : remainingMsRef.current
         segmentMs = Math.max(0, plannedMs - remainingMs)
       }
       const elapsedMs = Math.round((sessionStudyMsRef.current + segmentMs) / 1000) * 1000
+      const liveStage = studyRunning ? skyStage(segmentMs, plannedMs) : 0
+      const stage = Math.max(liveStage, earnedStageRef.current)
       let phase = 'idle'
       if (isBreakModeRef.current) phase = 'break'
       else if (isRunningRef.current || sessionStudyMsRef.current > 0 || segmentMs > 0) phase = 'focus'
-      onFocusProgress({ elapsedMs, phase })
+      onFocusProgress({ elapsedMs, phase, stage })
     }
 
     report()
-    const id = setInterval(report, 1000)
+    const id = setInterval(report, 250)
     const onForeground = () => {
       if (document.visibilityState === 'hidden') return
       report()
@@ -406,37 +411,41 @@ export default function Time({ isRunning, setIsRunning, isPause, isSoundOn, isRe
     (
   <div>
       <form action = "submit-time" className = 'time-form' onSubmit={handleSubmit}>
+        <DurationPicker seconds={secondsFromClock(clock)} onPick={(total) => setClock(clockFromSeconds(total))} />
         <div className='time'>
           <input className='hours'
-            defaultValue = { isReset ? String(Math.floor(prevTime/3600)).padStart(2,0): ''}
-            type='number'
+            value={clock.hours}
+            type='text'
             placeholder='00'
             id = "time"
             name = "hours"
-            maxLength={2}
             inputMode='numeric'
-            onInput={handleInput}
+            autoComplete='off'
+            aria-label='Hours'
+            onChange={setClockPart('hours')}
             onWheel={disableWheel}/>:
           <input className='minutes'
-            defaultValue = { isReset ? String(Math.floor((prevTime %3600) / 60)).padStart(2,0): ''}
-            type='number'
+            value={clock.minutes}
+            type='text'
             id = "time"
             name = "minutes"
             placeholder='00'
-            maxLength={2}
-            onInput={handleInput}
+            aria-label='Minutes'
+            onChange={setClockPart('minutes')}
             inputMode='numeric'
+            autoComplete='off'
             onWheel={disableWheel}/>:
           <input className='seconds'
-            defaultValue = { isReset ? String(Math.floor(prevTime % 60)).padStart(2,0): ''}
-            type='number'
+            value={clock.seconds}
+            type='text'
             id = "time"
             name = "seconds"
             placeholder='00'
-            maxLength={2}
+            aria-label='Seconds'
             inputMode='numeric'
+            autoComplete='off'
             onWheel={disableWheel}
-            onInput={handleInput}/>
+            onChange={setClockPart('seconds')}/>
         </div>
         <div className='button-container'>
           <button type= "submit" className='time-button'>Begin</button>

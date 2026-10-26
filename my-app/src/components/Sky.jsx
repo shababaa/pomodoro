@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { isNightHour, skyStage } from '../utils/skyStage'
+import { isNightHour } from '../utils/skyStage'
 
 const STARS = [
   { top: '12%', left: '14%', size: 5, stage: 1, delay: '0s' },
@@ -64,7 +64,7 @@ function Cloud({ cloud }) {
   )
 }
 
-export default function Sky({ elapsedMs = 0, phase = 'idle' }) {
+export default function Sky({ stage = 0, phase = 'idle' }) {
   const [night, setNight] = useState(() => isNightHour(new Date().getHours()))
 
   useEffect(() => {
@@ -73,12 +73,12 @@ export default function Sky({ elapsedMs = 0, phase = 'idle' }) {
     return () => clearInterval(id)
   }, [])
 
-  const stage = skyStage(elapsedMs)
+  const sceneStage = Math.max(0, Math.min(3, stage))
   const scene = night ? 'night' : 'day'
 
   return (
     <div
-      className={`sky sky--${scene} sky--stage-${stage}${phase === 'break' ? ' sky--break' : ''}`}
+      className={`sky sky--${scene} sky--stage-${sceneStage}${phase === 'break' ? ' sky--break' : ''}`}
       aria-hidden="true"
     >
       {night ? (
@@ -93,15 +93,15 @@ export default function Sky({ elapsedMs = 0, phase = 'idle' }) {
               <circle cx="30" cy="32" r="20" fill="#f6e7c1" mask="url(#cozy-moon)" />
             </svg>
           </span>
-          {stage >= 3 && <span className="sky-milky" />}
-          {STARS.filter((star) => star.stage <= stage).map((star) => (
+          {sceneStage >= 3 && <span className="sky-milky" />}
+          {STARS.filter((star) => star.stage <= sceneStage).map((star) => (
             <Star key={`${star.top}-${star.left}`} star={star} />
           ))}
         </>
       ) : (
         <>
           <span className="sky-sun" />
-          {CLOUDS.filter((cloud) => cloud.stage <= stage).map((cloud) => (
+          {CLOUDS.filter((cloud) => cloud.stage <= sceneStage).map((cloud) => (
             <Cloud key={`${cloud.top}-${cloud.left}`} cloud={cloud} />
           ))}
         </>

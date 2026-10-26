@@ -15,12 +15,11 @@ export default function Home({ apiBase }) {
     const [selectedProjectId, setSelectedProjectId] = useState(null)
     const [activeSessionProjectId, setActiveSessionProjectId] = useState(null)
     const [refreshSessionsTrigger, setRefreshSessionsTrigger] = useState(0)
-  const [addTimeHandler, setAddTimeHandler] = useState(null)
-    const [focusProgress, setFocusProgress] = useState({ elapsedMs: 0, phase: 'idle' })
+    const [focusProgress, setFocusProgress] = useState({ elapsedMs: 0, phase: 'idle', stage: 0 })
 
     const handleFocusProgress = useCallback((next) => {
         setFocusProgress((prev) => {
-            if (prev.phase === next.phase && prev.elapsedMs === next.elapsedMs) return prev
+            if (prev.phase === next.phase && prev.elapsedMs === next.elapsedMs && prev.stage === next.stage) return prev
             return next
         })
     }, [])
@@ -63,7 +62,7 @@ export default function Home({ apiBase }) {
 
     return (
         <div className="home-shell">
-            <Sky elapsedMs={focusProgress.elapsedMs} phase={focusProgress.phase} />
+            <Sky stage={focusProgress.stage} phase={focusProgress.phase} />
             <Projects 
                 apiBase={apiBase} 
                 onProjectSelect={setSelectedProjectId} 
@@ -86,7 +85,6 @@ export default function Home({ apiBase }) {
                         onSessionStart={handleSessionStart}
                         onSessionFinish={handleSessionFinish}
                         onFocusProgress={handleFocusProgress}
-                    onAddTimeReady={(fn) => setAddTimeHandler(() => fn)} // store function, not execute
                     />
                 <Header 
                     isRunning={isRunning} 
@@ -95,7 +93,6 @@ export default function Home({ apiBase }) {
                     isSoundOn={isSoundOn} 
                     setIsSoundOn={setIsSoundOn} 
                     setIsReset = {setIsReset}
-                    onAddTime={addTimeHandler}
                 />
                 </section>
             </main>
