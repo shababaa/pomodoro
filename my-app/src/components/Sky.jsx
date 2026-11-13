@@ -1,6 +1,3 @@
-import { useEffect, useState } from 'react'
-import { isNightHour } from '../utils/skyStage'
-
 const STARS = [
   { top: '8%', left: '12%', size: 4, at: 0.06, delay: '0s' },
   { top: '14%', left: '78%', size: 6, at: 0.12, delay: '1.1s' },
@@ -16,6 +13,13 @@ const STARS = [
   { top: '32%', left: '54%', size: 3, at: 0.8, delay: '2.1s' },
   { top: '7%', left: '22%', size: 3, at: 0.86, delay: '1.3s' },
   { top: '44%', left: '74%', size: 4, at: 0.92, delay: '0.5s' },
+]
+
+const DUSK_STARS = [
+  { top: '16%', left: '18%', size: 3, at: 0.42, delay: '0.4s' },
+  { top: '10%', left: '72%', size: 4, at: 0.58, delay: '1.2s' },
+  { top: '28%', left: '46%', size: 3, at: 0.74, delay: '0.2s' },
+  { top: '20%', left: '88%', size: 3, at: 0.88, delay: '1.6s' },
 ]
 
 const CLOUDS = [
@@ -46,10 +50,10 @@ function PixelMoon() {
   )
 }
 
-function PixelSun() {
+function PixelSun({ setting = false }) {
   return (
-    <svg className="scene-pixel scene-pixel--sun" viewBox="0 0 16 16" aria-hidden="true">
-      <g fill="#ECA994">
+    <svg className={`scene-pixel ${setting ? 'scene-pixel--sun-low' : 'scene-pixel--sun'}`} viewBox="0 0 16 16" aria-hidden="true">
+      <g fill={setting ? '#C4786A' : '#ECA994'}>
         <rect x="7" y="1" width="2" height="2" />
         <rect x="7" y="13" width="2" height="2" />
         <rect x="1" y="7" width="2" height="2" />
@@ -59,7 +63,7 @@ function PixelSun() {
         <rect x="3" y="11" width="2" height="2" />
         <rect x="11" y="11" width="2" height="2" />
       </g>
-      <g fill="#FFF6E9">
+      <g fill={setting ? '#ECA994' : '#FFF6E9'}>
         <rect x="5" y="5" width="6" height="6" />
       </g>
     </svg>
@@ -98,60 +102,77 @@ function PixelWindow({ progress }) {
   )
 }
 
-export default function Sky({ progress = 0, phase = 'idle' }) {
-  const [night, setNight] = useState(() => isNightHour(new Date().getHours()))
+function StarField({ stars, progress }) {
+  return stars.map((star) => (
+    <div
+      key={`${star.top}-${star.left}`}
+      className="scene-star"
+      style={{
+        top: star.top,
+        left: star.left,
+        width: star.size,
+        height: star.size,
+        '--fade': reveal(progress, star.at),
+      }}
+    >
+      <i className="scene-star__glint" style={{ animationDelay: star.delay }} />
+    </div>
+  ))
+}
 
-  useEffect(() => {
-    const tick = () => setNight(isNightHour(new Date().getHours()))
-    const id = setInterval(tick, 60 * 1000)
-    return () => clearInterval(id)
-  }, [])
+function CloudField({ clouds, progress, warm = false }) {
+  return clouds.map((cloud) => (
+    <div
+      key={`${cloud.top}-${cloud.left}`}
+      className={`scene-cloud${warm ? ' scene-cloud--warm' : ''}`}
+      style={{
+        top: cloud.top,
+        left: cloud.left,
+        '--fade': reveal(progress, cloud.at),
+        animationDelay: cloud.delay,
+        animationDuration: cloud.duration,
+      }}
+    >
+      <i style={{ transform: `scale(${cloud.scale})` }} />
+    </div>
+  ))
+}
 
-  const scene = night ? 'night' : 'day'
+export default function Sky({ progress = 0, phase = 'idle', scene = 'day' }) {
   const grown = Math.max(0, Math.min(1, progress))
+  const painted = scene === 'sunset' || scene === 'night' ? scene : 'day'
 
   return (
     <div
-      className={`sky sky--${scene}${phase === 'break' ? ' sky--break' : ''}`}
+      className={`sky sky--${painted}${phase === 'break' ? ' sky--break' : ''}`}
       style={{ '--sky-progress': grown }}
       aria-hidden="true"
     >
-      <span className="scene-haze" style={{ opacity: 0.15 + grown * 0.45 }} />
-      {night ? <PixelMoon /> : <PixelSun />}
-      {night ? <PixelWindow progress={grown} /> : <PixelSprout progress={grown} />}
-      <span className="scene-band" style={{ opacity: reveal(grown, 0.72) }} />
-      {night
-        ? STARS.map((star) => (
-          <span
-            key={`${star.top}-${star.left}`}
-            className="scene-star"
-            style={{
-              top: star.top,
-              left: star.left,
-              width: star.size,
-              height: star.size,
-              '--fade': reveal(grown, star.at),
-              animationDelay: star.delay,
-            }}
-          >
-            <i />
-          </span>
-        ))
-        : CLOUDS.map((cloud) => (
-          <span
-            key={`${cloud.top}-${cloud.left}`}
-            className="scene-cloud"
-            style={{
-              top: cloud.top,
-              left: cloud.left,
-              '--fade': reveal(grown, cloud.at),
-              animationDelay: cloud.delay,
-              animationDuration: cloud.duration,
-            }}
-          >
-            <i style={{ transform: `scale(${cloud.scale})` }} />
-          </span>
-        ))}
+      <div className="scene-wash scene-wash--sunset" />
+      <div className="scene-wash scene-wash--night" />
+
+      <div className="scene-layer scene-layer--day">
+        <div className="scene-haze" style={{ opacity: 0.15 + grown * 0.45 }} />
+        <PixelSun />
+        <PixelSprout progress={grown} />
+        <CloudField clouds={CLOUDS} progress={grown} />
+      </div>
+
+      <div className="scene-layer scene-layer--sunset">
+        <div className="scene-horizon" style={{ opacity: 0.35 + grown * 0.4 }} />
+        <PixelSun setting />
+        <PixelSprout progress={grown} />
+        <CloudField clouds={CLOUDS} progress={grown} warm />
+        <StarField stars={DUSK_STARS} progress={grown} />
+      </div>
+
+      <div className="scene-layer scene-layer--night">
+        <div className="scene-haze" style={{ opacity: 0.2 + grown * 0.45 }} />
+        <PixelMoon />
+        <PixelWindow progress={grown} />
+        <div className="scene-band" style={{ opacity: reveal(grown, 0.72) }} />
+        <StarField stars={STARS} progress={grown} />
+      </div>
     </div>
   )
 }

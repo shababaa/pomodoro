@@ -33,11 +33,43 @@ function Chevron() {
 
 export default function DurationPicker({ seconds, onPick }) {
   const [open, setOpen] = useState(false)
+  const [mounted, setMounted] = useState(false)
+  const [visible, setVisible] = useState(false)
+  const [satisfied, setSatisfied] = useState(false)
   const [edges, setEdges] = useState({ prev: false, next: true })
   const rootRef = useRef(null)
   const scrollerRef = useRef(null)
   const dragRef = useRef(null)
   const suppressClickRef = useRef(false)
+  const satisfiedTimer = useRef(null)
+
+  useEffect(() => () => clearTimeout(satisfiedTimer.current), [])
+
+  useEffect(() => {
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    if (open) {
+      setMounted(true)
+      if (reduce) setVisible(true)
+      return undefined
+    }
+    setVisible(false)
+    if (reduce) {
+      setMounted(false)
+      return undefined
+    }
+    const timer = setTimeout(() => setMounted(false), 180)
+    return () => clearTimeout(timer)
+  }, [open])
+
+  useEffect(() => {
+    if (!open || !mounted) return undefined
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      setVisible(true)
+      return undefined
+    }
+    const frame = requestAnimationFrame(() => setVisible(true))
+    return () => cancelAnimationFrame(frame)
+  }, [open, mounted])
 
   useEffect(() => {
     if (!open) return undefined
@@ -58,7 +90,7 @@ export default function DurationPicker({ seconds, onPick }) {
   }, [open])
 
   useEffect(() => {
-    if (!open) return undefined
+    if (!mounted) return undefined
     const el = scrollerRef.current
     if (!el) return undefined
 
@@ -98,7 +130,7 @@ export default function DurationPicker({ seconds, onPick }) {
       el.removeEventListener('scroll', updateEdges)
       el.removeEventListener('wheel', onWheel)
     }
-  }, [open])
+  }, [mounted])
 
   const onPointerDown = (event) => {
     if (event.button !== 0) return
@@ -148,7 +180,7 @@ export default function DurationPicker({ seconds, onPick }) {
   }
 
   return (
-    <div className={`length-picker${open ? ' is-open' : ''}`} ref={rootRef}>
+    <div className={`length-picker${open ? ' is-open' : ''}${satisfied ? ' is-satisfied' : ''}`} ref={rootRef}>
       <button
         type="button"
         className="length-picker__toggle"
@@ -162,8 +194,8 @@ export default function DurationPicker({ seconds, onPick }) {
           <Chevron />
         </span>
       </button>
-      {open && (
-        <div className={`length-picker__frame${edges.prev ? ' has-prev' : ''}${edges.next ? ' has-next' : ''}`}>
+      {mounted && (
+        <div className={`length-picker__frame${visible ? ' is-visible' : ''}${edges.prev ? ' has-prev' : ''}${edges.next ? ' has-next' : ''}`}>
           <div
             className="length-picker__viewport"
             ref={scrollerRef}
@@ -185,6 +217,9 @@ export default function DurationPicker({ seconds, onPick }) {
                     className={`length-picker__option${selected ? ' is-selected' : ''}`}
                     onClick={() => {
                       onPick(length.seconds)
+                      setSatisfied(true)
+                      clearTimeout(satisfiedTimer.current)
+                      satisfiedTimer.current = setTimeout(() => setSatisfied(false), 420)
                       setOpen(false)
                     }}
                   >

@@ -1,6 +1,44 @@
-/** Night is 6pm through 5am, local time. */
+/** Local hour picks the painted sky. The device clock is never changed. */
+export function sceneForHour(hour) {
+  const value = Number(hour)
+  if (!Number.isFinite(value)) return 'day'
+  const hourOfDay = ((Math.floor(value) % 24) + 24) % 24
+  if (hourOfDay >= 20 || hourOfDay < 5) return 'night'
+  if (hourOfDay >= 17) return 'sunset'
+  return 'day'
+}
+
 export function isNightHour(hour) {
-  return hour >= 18 || hour < 5
+  return sceneForHour(hour) === 'night'
+}
+
+export function sanitizeSceneChoice(value) {
+  if (value === 'day' || value === 'sunset' || value === 'night' || value === 'auto') return value
+  return 'auto'
+}
+
+/** Manual day, sunset, or night wins. Auto follows the local hour. */
+export function resolveScene(choice, hour) {
+  const scene = sanitizeSceneChoice(choice)
+  if (scene === 'auto') return sceneForHour(hour)
+  return scene
+}
+
+/**
+ * Amount the sky should paint, from 0 to 1.
+ * A numeric preview replaces the live amount, including 0.
+ * This value is display-only: it must not reach the timer or the session API.
+ */
+export function displaySkyProgress(liveProgress, previewProgress) {
+  const live = clamp01(liveProgress)
+  if (previewProgress == null) return live
+  return clamp01(previewProgress)
+}
+
+function clamp01(value) {
+  const number = Number(value)
+  if (!Number.isFinite(number)) return 0
+  return Math.min(1, Math.max(0, number))
 }
 
 /**

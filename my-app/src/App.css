@@ -2551,3 +2551,626 @@ input[type="number"] {
     right: 6%;
   }
 }
+
+/* Day, sunset, and night share one peach base. Washes crossfade the other skies. */
+
+.sky {
+  background: #F8D7BD;
+}
+
+.sky.sky--day,
+.sky.sky--sunset,
+.sky.sky--night {
+  background: #F8D7BD;
+}
+
+.scene-wash,
+.scene-layer,
+.scene-horizon {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.scene-wash {
+  opacity: 0;
+  transition: opacity 1.1s ease;
+}
+
+.scene-wash--sunset {
+  background: linear-gradient(180deg, #ECA994 0%, #F8D7BD 58%, #E7B89A 100%);
+}
+
+.scene-wash--night {
+  background:
+    radial-gradient(ellipse at 70% 0%, #2c3458 0%, #222844 46%, #1a2038 100%);
+}
+
+.sky--sunset .scene-wash--sunset,
+.sky--night .scene-wash--night {
+  opacity: 1;
+}
+
+.scene-layer {
+  opacity: 0;
+  transition: opacity 1.1s ease;
+}
+
+.sky--day .scene-layer--day,
+.sky--sunset .scene-layer--sunset,
+.sky--night .scene-layer--night {
+  opacity: 1;
+}
+
+.sky .scene-haze,
+.sky .scene-band,
+.sky .scene-star,
+.sky .scene-cloud,
+.sky .scene-pixel,
+.sky .scene-horizon {
+  position: absolute;
+}
+
+.sky .scene-band {
+  top: 16%;
+  height: 12%;
+}
+
+.scene-horizon {
+  top: auto;
+  height: 32%;
+  background: linear-gradient(180deg, transparent, rgba(236, 169, 148, 0.45));
+}
+
+.sky .scene-pixel--sun-low {
+  top: auto;
+  right: 12%;
+  bottom: 18%;
+  width: 84px;
+  height: 84px;
+}
+
+.sky .scene-star {
+  opacity: var(--fade);
+  color: #FFF6E9;
+  transition: opacity 1.6s ease;
+}
+
+.sky .scene-star__glint {
+  display: block;
+  width: 2px;
+  height: 2px;
+  margin: 2px auto 0;
+  background: #FFF6E9;
+  animation: scene-twinkle 4.8s ease-in-out infinite;
+  box-shadow:
+    0 -3px 0 #FFF6E9,
+    0 3px 0 #FFF6E9,
+    -3px 0 0 #FFF6E9,
+    3px 0 0 #FFF6E9;
+}
+
+.scene-cloud--warm i {
+  background: rgba(255, 246, 233, 0.82);
+  box-shadow:
+    26px 8px 0 -2px rgba(236, 169, 148, 0.9),
+    -22px 12px 0 -4px rgba(255, 246, 233, 0.7);
+}
+
+.sky--break::after {
+  z-index: 2;
+}
+
+.timer-stage,
+.timer-corner,
+.timer-status,
+.timer-digits,
+.timer-digits input,
+.timer-quiet,
+.timer-cheer-note {
+  transition: color 1.1s ease;
+}
+
+.sky--sunset ~ .timer-stage .timer-track > span {
+  background: #3B302C;
+}
+
+.sky--sunset ~ .timer-stage .timer-digits,
+.sky--sunset ~ .timer-stage .timer-digits input,
+.sky--sunset ~ .timer-stage .timer-status,
+.sky--sunset ~ .timer-stage .timer-quiet,
+.sky--sunset ~ .timer-corner {
+  color: #3B302C;
+}
+
+.timer-focal {
+  position: relative;
+}
+
+.timer-primary,
+.sound-toggle,
+.logout-quiet,
+.projects-tab,
+.journal-close,
+.journal-card__main,
+.journal-card__delete,
+.projects-drawer .projects-sidebar__add,
+.scene-control__toggle,
+.scene-control__option,
+.ambient-panel__toggle,
+.ambient-panel__option,
+.length-picker__toggle,
+.length-picker__option,
+.dev-scrubber__live {
+  touch-action: manipulation;
+  transition: transform 0.12s ease, background-color 0.15s ease, box-shadow 0.12s ease;
+}
+
+.timer-primary:active,
+.sound-toggle:active,
+.logout-quiet:active,
+.projects-tab:active,
+.journal-close:active,
+.journal-card__delete:active,
+.projects-drawer .projects-sidebar__add:active,
+.scene-control__toggle:active,
+.scene-control__option:active,
+.ambient-panel__toggle:active,
+.ambient-panel__option:active,
+.length-picker__toggle:active,
+.length-picker__option:active,
+.dev-scrubber__live:active {
+  transform: translateY(1px);
+}
+
+.home-shell .length-picker__frame {
+  opacity: 0;
+  transform: translateY(-6px);
+  transition: opacity 0.18s ease, transform 0.18s ease;
+}
+
+.home-shell .length-picker__frame.is-visible {
+  opacity: 1;
+  transform: none;
+}
+
+.home-shell .length-picker.is-satisfied .length-picker__toggle {
+  animation: pick-settle 0.36s ease;
+}
+
+@keyframes pick-settle {
+  0% { transform: scale(0.97); }
+  55% { transform: scale(1.035); }
+  100% { transform: scale(1); }
+}
+
+.timer-cheer {
+  position: absolute;
+  left: 50%;
+  top: 46%;
+  width: min(460px, 92vw);
+  height: 0;
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+.timer-cheer i {
+  position: absolute;
+  top: 0;
+  width: 7px;
+  height: 7px;
+  border-radius: 1px;
+  background: #ECA994;
+  opacity: 0;
+}
+
+.is-celebrating .timer-cheer i {
+  animation: cheer-rise 1.45s ease-out forwards;
+}
+
+.timer-cheer i:nth-child(1) { left: 8%; }
+.timer-cheer i:nth-child(2) { left: 24%; animation-delay: 0.08s; background: #B8D6BE; }
+.timer-cheer i:nth-child(3) { left: 40%; animation-delay: 0.02s; }
+.timer-cheer i:nth-child(4) { left: 56%; animation-delay: 0.12s; background: #FFF6E9; }
+.timer-cheer i:nth-child(5) { left: 72%; animation-delay: 0.05s; }
+.timer-cheer i:nth-child(6) { left: 88%; animation-delay: 0.1s; background: #B8D6BE; }
+
+.sky--night ~ .timer-stage .timer-cheer i {
+  background: #B8D6BE;
+}
+
+@keyframes cheer-rise {
+  0% { opacity: 0; transform: translateY(6px); }
+  18% { opacity: 0.95; }
+  100% { opacity: 0; transform: translateY(-42px); }
+}
+
+.timer-cheer-note {
+  margin: 0 0 8px;
+  font-family: "Nunito", sans-serif;
+  font-weight: 800;
+  font-size: 0.95rem;
+  letter-spacing: 0.04em;
+  color: #3B302C;
+  animation: cheer-note 1.6s ease forwards;
+}
+
+.sky--night ~ .timer-stage .timer-cheer-note {
+  color: #FFF6E9;
+}
+
+@keyframes cheer-note {
+  0% { opacity: 0; }
+  12% { opacity: 1; }
+  72% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+.scene-control,
+.ambient-panel {
+  position: relative;
+}
+
+.scene-control__toggle,
+.ambient-panel__toggle,
+.sound-toggle,
+.logout-quiet {
+  min-height: 44px;
+}
+
+.scene-control__toggle,
+.ambient-panel__toggle {
+  margin: 0;
+  border: 0;
+  border-radius: 999px;
+  padding: 0 14px;
+  background: rgba(255, 246, 233, 0.78);
+  color: #3B302C;
+  font-family: "Nunito", sans-serif;
+  font-weight: 800;
+  font-size: 0.85rem;
+  cursor: pointer;
+  box-shadow: none;
+}
+
+.scene-control__menu,
+.ambient-panel__menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  z-index: 2;
+  width: min(240px, calc(100vw - 24px));
+  box-sizing: border-box;
+  padding: 10px;
+  border-radius: 16px;
+  background: #FFF6E9;
+  color: #3B302C;
+  box-shadow: 0 12px 32px rgba(34, 40, 68, 0.16);
+  animation: menu-in 0.18s ease;
+}
+
+@keyframes menu-in {
+  from { opacity: 0; transform: translateY(-6px); }
+  to { opacity: 1; transform: none; }
+}
+
+.scene-control__option,
+.ambient-panel__option {
+  display: block;
+  width: 100%;
+  min-height: 44px;
+  margin: 0;
+  border: 0;
+  border-radius: 12px;
+  background: transparent;
+  color: #3B302C;
+  box-shadow: none;
+  font-family: "Nunito", sans-serif;
+  font-weight: 800;
+  font-size: 0.92rem;
+  text-align: left;
+  padding: 0 12px;
+  cursor: pointer;
+}
+
+.scene-control__option.is-selected,
+.ambient-panel__option.is-selected {
+  background: #ECA994;
+}
+
+.scene-control__option:focus-visible,
+.ambient-panel__option:focus-visible,
+.scene-control__toggle:focus-visible,
+.ambient-panel__toggle:focus-visible,
+.journal-close:focus-visible,
+.dev-scrubber__live:focus-visible,
+.dev-scrubber input:focus-visible {
+  outline: 2px solid #ECA994;
+  outline-offset: 3px;
+}
+
+.scene-control__note,
+.ambient-panel__note {
+  margin: 8px 4px 2px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  line-height: 1.35;
+  color: rgba(59, 48, 44, 0.72);
+}
+
+.ambient-panel__choices {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+}
+
+.ambient-panel__volume {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 10px;
+  padding: 0 4px 4px;
+}
+
+.ambient-panel__volume span,
+.dev-scrubber span {
+  position: static;
+  inset: auto;
+  color: #3B302C;
+  background: none;
+  -webkit-background-clip: border-box;
+  background-clip: border-box;
+  text-shadow: none;
+  transform: none;
+  font-family: "Nunito", sans-serif;
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.ambient-panel__volume input,
+.dev-scrubber input[type="range"] {
+  width: 100%;
+  accent-color: #ECA994;
+  margin: 0;
+}
+
+.sky--night ~ .timer-corner .scene-control__toggle,
+.sky--night ~ .timer-corner .ambient-panel__toggle,
+.sky--night ~ .timer-corner .sound-toggle,
+.sky--night ~ .timer-corner .logout-quiet {
+  background: rgba(255, 246, 233, 0.12);
+  color: #FFF6E9;
+}
+
+.journal-close {
+  display: none;
+  margin: 0 0 12px;
+  min-height: 44px;
+  padding: 0 14px;
+  border: 0;
+  border-radius: 999px;
+  background: rgba(248, 215, 189, 0.7);
+  color: #3B302C;
+  box-shadow: none;
+  font-family: "Nunito", sans-serif;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.dev-scrubber {
+  position: fixed;
+  z-index: 7;
+  left: 50%;
+  bottom: max(12px, env(safe-area-inset-bottom));
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: min(440px, calc(100vw - 28px));
+  box-sizing: border-box;
+  padding: 8px 12px;
+  border-radius: 16px;
+  background: rgba(255, 246, 233, 0.94);
+  color: #3B302C;
+  box-shadow: 0 10px 28px rgba(34, 40, 68, 0.12);
+  pointer-events: auto;
+}
+
+.dev-scrubber__label {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.dev-scrubber__live {
+  margin: 0;
+  min-height: 44px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 999px;
+  background: #F8D7BD;
+  color: #3B302C;
+  box-shadow: none;
+  font-family: "Nunito", sans-serif;
+  font-weight: 800;
+  font-size: 0.82rem;
+  cursor: pointer;
+}
+
+.dev-scrubber__live:disabled {
+  opacity: 0.55;
+  cursor: default;
+  transform: none;
+}
+
+.home-shell--preview .timer-stage {
+  padding-bottom: 108px;
+}
+
+.timer-corner {
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  max-width: calc(100vw - 76px);
+}
+
+@media (max-width: 900px) {
+  .sky .scene-pixel--sun,
+  .sky .scene-pixel--moon {
+    width: 60px;
+    height: 60px;
+    top: 18%;
+    right: 8%;
+  }
+
+  .sky .scene-pixel--sun-low {
+    width: 64px;
+    height: 64px;
+    bottom: 14%;
+    right: 8%;
+  }
+
+  .sky .scene-pixel--ground {
+    width: 46px;
+    height: 46px;
+    left: 5%;
+    bottom: 6%;
+  }
+
+  .scene-cloud {
+    width: 92px;
+  }
+}
+
+@media (max-width: 720px) {
+  .timer-stage {
+    padding-top: 118px;
+    padding-left: 56px;
+    padding-right: 16px;
+  }
+
+  .home-shell .timer-digits,
+  .home-shell .timer-digits input,
+  .home-shell .show-time {
+    font-size: clamp(3rem, 16vw, 4.8rem);
+  }
+
+  .timer-primary {
+    min-height: 48px;
+    min-width: 148px;
+  }
+
+  .home-shell .length-picker__option,
+  .length-picker__nudge {
+    min-height: 44px;
+  }
+
+  .length-picker__nudge {
+    width: 36px;
+    height: 36px;
+  }
+
+  .projects-drawer {
+    width: min(300px, 78vw);
+  }
+
+  .projects-tab {
+    min-width: 44px;
+    padding: 16px 12px;
+  }
+
+  .journal-close {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .journal-card__main {
+    min-height: 44px;
+  }
+
+  .journal-card__delete,
+  .projects-drawer .projects-sidebar__add {
+    width: 44px;
+    height: 44px;
+  }
+
+  .dev-scrubber {
+    width: min(440px, calc(100vw - 20px));
+    flex-wrap: wrap;
+  }
+}
+
+@media (max-height: 560px) {
+  .timer-stage {
+    padding-top: 72px;
+    padding-bottom: 20px;
+  }
+
+  .home-shell--preview .timer-stage {
+    padding-bottom: 84px;
+  }
+
+  .home-shell .timer-digits,
+  .home-shell .timer-digits input,
+  .home-shell .show-time {
+    font-size: clamp(2.5rem, 12vh, 4.2rem);
+  }
+
+  .sky .scene-pixel--sun,
+  .sky .scene-pixel--moon,
+  .sky .scene-pixel--sun-low,
+  .sky .scene-pixel--ground {
+    width: 40px;
+    height: 40px;
+  }
+
+  .scene-cloud {
+    width: 72px;
+    height: 28px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sky,
+  .scene-wash,
+  .scene-layer,
+  .scene-star,
+  .scene-cloud,
+  .scene-haze,
+  .projects-drawer,
+  .home-shell .length-picker__frame,
+  .scene-control__menu,
+  .ambient-panel__menu,
+  .timer-primary,
+  .timer-track > span,
+  .timer-stage,
+  .timer-corner {
+    transition: none;
+    animation: none;
+  }
+
+  .scene-star__glint,
+  .scene-cloud,
+  .home-shell .length-picker.is-satisfied .length-picker__toggle,
+  .is-celebrating .timer-cheer i,
+  .timer-cheer-note {
+    animation: none;
+  }
+
+  .timer-cheer-note {
+    opacity: 1;
+  }
+
+  .timer-primary:active,
+  .sound-toggle:active,
+  .logout-quiet:active,
+  .projects-tab:active,
+  .length-picker__toggle:active,
+  .length-picker__option:active,
+  .scene-control__toggle:active,
+  .ambient-panel__toggle:active {
+    transform: none;
+  }
+}

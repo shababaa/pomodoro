@@ -246,6 +246,9 @@ export default function Projects({ apiBase, onProjectSelect, selectedProjectId, 
                 Projects
             </button>
         <div className='projects-panel'>
+            <button type="button" className="journal-close" onClick={() => setOpen(false)}>
+              Close
+            </button>
             <div className='projects-sidebar__header'>
               <button
                 type='button'

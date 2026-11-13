@@ -1,16 +1,16 @@
-import { FaVolumeHigh } from "react-icons/fa6";
-import { IoVolumeMute } from "react-icons/io5";
+import { FaBell, FaBellSlash } from "react-icons/fa6";
 
 export default function Header({ isSoundOn, setIsSoundOn }) {
   return (
     <button
       type="button"
       className="sound-toggle"
-      aria-label={isSoundOn ? 'Mute sound' : 'Unmute sound'}
+      aria-label={isSoundOn ? 'Turn completion chime off' : 'Turn completion chime on'}
       aria-pressed={isSoundOn}
+      title={isSoundOn ? 'Completion chime on' : 'Completion chime off'}
       onClick={() => setIsSoundOn((prev) => !prev)}
     >
-      {isSoundOn ? <FaVolumeHigh size={18} /> : <IoVolumeMute size={18} />}
+      {isSoundOn ? <FaBell size={16} /> : <FaBellSlash size={16} />}
     </button>
   )
 }
