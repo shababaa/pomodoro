@@ -154,9 +154,9 @@ export default function DurationPicker({ seconds, onPick }) {
         className="length-picker__toggle"
         aria-expanded={open}
         aria-controls="length-options"
+        aria-label={`Timer length, ${lengthValue(seconds)}`}
         onClick={() => setOpen((value) => !value)}
       >
-        <span className="length-picker__name">Length</span>
         <span className="length-picker__value">
           {lengthValue(seconds)}
           <Chevron />

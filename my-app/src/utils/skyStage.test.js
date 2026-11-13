@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { isNightHour, skyStage } from './skyStage.js'
+import { isNightHour, skyProgress, skyStage } from './skyStage.js'
 
 test('evening and late night are the starry scene', () => {
   assert.equal(isNightHour(18), true)
@@ -38,6 +38,19 @@ test('longer timers step in thirds of the length that was set', () => {
   assert.equal(skyStage(40 * min, 60 * min), 2)
   assert.equal(skyStage(60 * min, 60 * min), 3)
   assert.equal(skyStage(90 * min, 60 * min), 3)
+})
+
+test('sky progress fills evenly across whatever length was set', () => {
+  const minute = 60 * 1000
+  assert.equal(skyProgress(0, minute), 0)
+  assert.equal(skyProgress(6 * 1000, minute), 0.1)
+  assert.equal(skyProgress(15 * 1000, minute), 0.25)
+  assert.equal(skyProgress(30 * 1000, minute), 0.5)
+  assert.equal(skyProgress(45 * 1000, minute), 0.75)
+  assert.equal(skyProgress(60 * 1000, minute), 1)
+  assert.equal(skyProgress(90 * 1000, minute), 1)
+  assert.equal(skyProgress(5 * 60 * 1000, 20 * 60 * 1000), 0.25)
+  assert.equal(skyProgress(20 * 1000, 0), 0)
 })
 
 test('an unset timer stays on the quiet sky', () => {

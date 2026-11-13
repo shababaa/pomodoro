@@ -1,6 +1,5 @@
 import React, { useCallback, useEffect, useState } from "react"
 import Projects from "../components/Projects"
-import Title from "../components/Title"
 import Time from "../components/Time"
 import Header from "../components/Header"
 import Sky from "../components/Sky"
@@ -15,11 +14,11 @@ export default function Home({ apiBase }) {
     const [selectedProjectId, setSelectedProjectId] = useState(null)
     const [activeSessionProjectId, setActiveSessionProjectId] = useState(null)
     const [refreshSessionsTrigger, setRefreshSessionsTrigger] = useState(0)
-    const [focusProgress, setFocusProgress] = useState({ elapsedMs: 0, phase: 'idle', stage: 0 })
+    const [focusProgress, setFocusProgress] = useState({ elapsedMs: 0, phase: 'idle', progress: 0 })
 
     const handleFocusProgress = useCallback((next) => {
         setFocusProgress((prev) => {
-            if (prev.phase === next.phase && prev.elapsedMs === next.elapsedMs && prev.stage === next.stage) return prev
+            if (prev.phase === next.phase && prev.elapsedMs === next.elapsedMs && prev.progress === next.progress) return prev
             return next
         })
     }, [])
@@ -62,7 +61,7 @@ export default function Home({ apiBase }) {
 
     return (
         <div className="home-shell">
-            <Sky stage={focusProgress.stage} phase={focusProgress.phase} />
+            <Sky progress={focusProgress.progress} phase={focusProgress.phase} />
             <Projects 
                 apiBase={apiBase} 
                 onProjectSelect={setSelectedProjectId} 
@@ -70,35 +69,29 @@ export default function Home({ apiBase }) {
                 activeSessionProjectId={activeSessionProjectId}
                 refreshTrigger={refreshSessionsTrigger}
             />
-            <Title />
-            <main className='app-layout'>
-                <section className='panel-right cozy-stage'>   
-                    <Time 
-                        isRunning={isRunning} 
-                        setIsRunning={setIsRunning} 
-                        isPause={isPause} 
-                        isSoundOn={isSoundOn} 
-                        isReset={isReset} 
-                        setIsReset={setIsReset}
-                        selectedProjectId={selectedProjectId}
-                        apiBase={apiBase}
-                        onSessionStart={handleSessionStart}
-                        onSessionFinish={handleSessionFinish}
-                        onFocusProgress={handleFocusProgress}
-                    />
-                <Header 
+            <div className="timer-corner">
+                <Header isSoundOn={isSoundOn} setIsSoundOn={setIsSoundOn} />
+                <button type="button" onClick={handleLogout} className="logout-quiet">
+                    Log out
+                </button>
+            </div>
+            <main className="timer-stage">
+                <h1 className="timer-page-name">Pomodoro</h1>
+                <Time 
                     isRunning={isRunning} 
-                    isPause = {isPause} 
-                    setIsPause = {setIsPause} 
+                    setIsRunning={setIsRunning} 
+                    isPause={isPause}
+                    setIsPause={setIsPause}
                     isSoundOn={isSoundOn} 
-                    setIsSoundOn={setIsSoundOn} 
-                    setIsReset = {setIsReset}
+                    isReset={isReset} 
+                    setIsReset={setIsReset}
+                    selectedProjectId={selectedProjectId}
+                    apiBase={apiBase}
+                    onSessionStart={handleSessionStart}
+                    onSessionFinish={handleSessionFinish}
+                    onFocusProgress={handleFocusProgress}
                 />
-                </section>
             </main>
-            <button type="button" onClick={handleLogout} className="logout-quiet">
-                Log out
-            </button>
         </div>
     )
 }

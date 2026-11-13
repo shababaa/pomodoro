@@ -4,7 +4,7 @@ import sound from "../assets/sounds/simplenoise.mp3"
 import Pause from './Pause';
 import DurationPicker from './DurationPicker'
 import { remainingWholeSeconds } from '../utils/timerClock'
-import { skyStage } from '../utils/skyStage'
+import { skyProgress } from '../utils/skyStage'
 
 function clockFromSeconds(totalSeconds) {
   const total = Math.max(0, Math.floor(totalSeconds))
@@ -21,7 +21,7 @@ function secondsFromClock(clock) {
     + (parseInt(clock.seconds, 10) || 0)
 }
 
-export default function Time({ isRunning, setIsRunning, isPause, isSoundOn, isReset, setIsReset, selectedProjectId, apiBase, onSessionStart, onSessionFinish, onFocusProgress}) {
+export default function Time({ isRunning, setIsRunning, isPause, setIsPause, isSoundOn, isReset, setIsReset, selectedProjectId, apiBase, onSessionStart, onSessionFinish, onFocusProgress}) {
 
   const [time, setTime] = useState(0); 
   const [prevTime, setPrevTime] = useState(0)
@@ -52,7 +52,7 @@ export default function Time({ isRunning, setIsRunning, isPause, isSoundOn, isRe
   const sessionStudyMsRef = useRef(0)
   // Fullest sky reached in this session. A finished block stays grown-in
   // through a break or another study block, until reset or finish.
-  const earnedStageRef = useRef(0)
+  const earnedProgressRef = useRef(0)
 
   const armDeadline = (totalSeconds) => {
     hasFinishedRef.current = false
@@ -156,7 +156,7 @@ export default function Time({ isRunning, setIsRunning, isPause, isSoundOn, isRe
     const studySeconds = sessionStudyTime
     const breakSeconds = sessionBreakTime
     sessionStudyMsRef.current = 0
-    earnedStageRef.current = 0
+    earnedProgressRef.current = 0
     setSessionStudyTime(0)
     setSessionBreakTime(0)
     // Create session with accumulated study and break times
@@ -199,7 +199,7 @@ export default function Time({ isRunning, setIsRunning, isPause, isSoundOn, isRe
       remainingMsRef.current = 0
       hasFinishedRef.current = false
       sessionStudyMsRef.current = 0
-      earnedStageRef.current = 0
+      earnedProgressRef.current = 0
       setClock(clockFromSeconds(prevTime))
       setTime(prevTime);
       setPrevTime(prevTime)
@@ -269,7 +269,7 @@ export default function Time({ isRunning, setIsRunning, isPause, isSoundOn, isRe
       } else {
         const studyDuration = initialDurationRef.current
         sessionStudyMsRef.current += studyDuration * 1000
-        earnedStageRef.current = 3
+        earnedProgressRef.current = 1
         setSessionStudyTime(prev => prev + studyDuration)
         setOptionsType('after-study')
         setShowBreakOptions(true)
@@ -330,12 +330,12 @@ export default function Time({ isRunning, setIsRunning, isPause, isSoundOn, isRe
         segmentMs = Math.max(0, plannedMs - remainingMs)
       }
       const elapsedMs = Math.round((sessionStudyMsRef.current + segmentMs) / 1000) * 1000
-      const liveStage = studyRunning ? skyStage(segmentMs, plannedMs) : 0
-      const stage = Math.max(liveStage, earnedStageRef.current)
+      const liveProgress = studyRunning ? skyProgress(segmentMs, plannedMs) : 0
+      const progress = Math.round(Math.max(liveProgress, earnedProgressRef.current) * 1000) / 1000
       let phase = 'idle'
       if (isBreakModeRef.current) phase = 'break'
       else if (isRunningRef.current || sessionStudyMsRef.current > 0 || segmentMs > 0) phase = 'focus'
-      onFocusProgress({ elapsedMs, phase, stage })
+      onFocusProgress({ elapsedMs, phase, progress })
     }
 
     report()
@@ -353,105 +353,87 @@ export default function Time({ isRunning, setIsRunning, isPause, isSoundOn, isRe
     }
   }, [onFocusProgress, isRunning, isPause, isBreakMode, showBreakOptions])
   
-  // Show break options after timer completes
-  if (showBreakOptions) {
-    // If we're continuing a session (have accumulated time), show Continue Studying option after study
-    const isContinuingSession = sessionStudyTime > 0 || sessionBreakTime > 0
-    
-    return (
-      <div className='break-options-container'>
-        <div className='break-options-buttons'>
-          {optionsType === 'after-study' && (
-            <>
-              <button 
-                className='time-button break-button'
-                onClick={handleStartBreak}
-              >
-                Start<br />Break
-              </button>
-              {isContinuingSession && (
-                <button 
-                  className='time-button continue-button'
-                  onClick={handleContinueStudying}
-                >
-                  Continue<br />Studying
-                </button>
-              )}
-            </>
-          )}
-          {optionsType === 'after-break' && (
-            <button 
-              className='time-button continue-button'
-              onClick={handleContinueStudying}
-            >
-              Continue<br />Studying
-            </button>
-          )}
-          <button 
-            className='time-button finish-button'
-            onClick={handleFinishSession}
-          >
-            Finish<br />Session
-          </button>
-        </div>
-      </div>
-    )
+  const requestReset = () => {
+    if (setIsPause) setIsPause(false)
+    setIsReset((prev) => !prev)
+  }
+
+  const plannedSeconds = isBreakMode ? breakStartTimeRef.current : initialDurationRef.current
+  let timerRatio = 0
+  if (showBreakOptions) timerRatio = 1
+  else if (isRunning && plannedSeconds > 0) {
+    timerRatio = Math.min(1, Math.max(0, (plannedSeconds - time) / plannedSeconds))
+  }
+
+  let status = 'Ready'
+  if (showBreakOptions && optionsType === 'after-study') status = 'Complete'
+  else if (showBreakOptions) status = 'Break done'
+  else if (isRunning && isPause) status = 'Paused'
+  else if (isBreakMode) status = 'Break'
+  else if (isRunning) status = 'Focusing'
+
+  const readout = `${String(Math.floor(time / 3600)).padStart(2, '0')}:${String(Math.floor((time % 3600) / 60)).padStart(2, '0')}:${String(time % 60).padStart(2, '0')}`
+  const isContinuingSession = sessionStudyTime > 0 || sessionBreakTime > 0
+
+  let primaryLabel = 'Begin'
+  let primaryAction = null
+  if (showBreakOptions && optionsType === 'after-break') {
+    primaryLabel = 'Continue'
+    primaryAction = handleContinueStudying
+  } else if (showBreakOptions) {
+    primaryLabel = 'Start break'
+    primaryAction = handleStartBreak
+  } else if (isRunning) {
+    primaryLabel = isPause ? 'Resume' : 'Pause'
+    primaryAction = () => setIsPause?.((prev) => !prev)
   }
 
   return (
-    isRunning ? (
-      <>
-        <div className= 'show-time'>
-          <h1>{String(Math.floor(time / 3600)).padStart(2,0)}:</h1>
-          <h1>{String(Math.floor((time % 3600) /60)).padStart(2,0)}:</h1>
-          <h1>{String(time % 60).padStart(2,0)}</h1>
+    <div className="timer-focal">
+      <p className="timer-status">{status}</p>
+      <div
+        className="timer-track"
+        role="progressbar"
+        aria-label="Session progress"
+        aria-valuemin={0}
+        aria-valuemax={100}
+        aria-valuenow={Math.round(timerRatio * 100)}
+      >
+        <span style={{ transform: `scaleX(${timerRatio})` }} />
+      </div>
+
+      {isRunning || showBreakOptions ? (
+        <p className="timer-digits show-time" aria-live="polite">{readout}</p>
+      ) : (
+        <form action="submit-time" className="time-form" onSubmit={handleSubmit}>
+          <DurationPicker seconds={secondsFromClock(clock)} onPick={(total) => setClock(clockFromSeconds(total))} />
+          <div className="timer-digits time">
+            <input className="hours" value={clock.hours} type="text" placeholder="00" name="hours" inputMode="numeric" autoComplete="off" aria-label="Hours" onChange={setClockPart('hours')} onWheel={disableWheel} />
+            <span aria-hidden="true">:</span>
+            <input className="minutes" value={clock.minutes} type="text" placeholder="00" name="minutes" inputMode="numeric" autoComplete="off" aria-label="Minutes" onChange={setClockPart('minutes')} onWheel={disableWheel} />
+            <span aria-hidden="true">:</span>
+            <input className="seconds" value={clock.seconds} type="text" placeholder="00" name="seconds" inputMode="numeric" autoComplete="off" aria-label="Seconds" onChange={setClockPart('seconds')} onWheel={disableWheel} />
+          </div>
+          <button type="submit" className="timer-primary">Begin</button>
+        </form>
+      )}
+
+      {(isRunning || showBreakOptions) && (
+        <button type="button" className="timer-primary" onClick={primaryAction}>{primaryLabel}</button>
+      )}
+
+      {isRunning && (
+        <button type="button" className="timer-quiet" onClick={requestReset}>Reset</button>
+      )}
+
+      {showBreakOptions && (
+        <div className="timer-quiet-row">
+          {optionsType === 'after-study' && isContinuingSession && (
+            <button type="button" className="timer-quiet" onClick={handleContinueStudying}>Continue studying</button>
+          )}
+          <button type="button" className="timer-quiet" onClick={handleFinishSession}>Finish session</button>
         </div>
-      </>
-    ) :
-    (
-  <div>
-      <form action = "submit-time" className = 'time-form' onSubmit={handleSubmit}>
-        <DurationPicker seconds={secondsFromClock(clock)} onPick={(total) => setClock(clockFromSeconds(total))} />
-        <div className='time'>
-          <input className='hours'
-            value={clock.hours}
-            type='text'
-            placeholder='00'
-            id = "time"
-            name = "hours"
-            inputMode='numeric'
-            autoComplete='off'
-            aria-label='Hours'
-            onChange={setClockPart('hours')}
-            onWheel={disableWheel}/>:
-          <input className='minutes'
-            value={clock.minutes}
-            type='text'
-            id = "time"
-            name = "minutes"
-            placeholder='00'
-            aria-label='Minutes'
-            onChange={setClockPart('minutes')}
-            inputMode='numeric'
-            autoComplete='off'
-            onWheel={disableWheel}/>:
-          <input className='seconds'
-            value={clock.seconds}
-            type='text'
-            id = "time"
-            name = "seconds"
-            placeholder='00'
-            aria-label='Seconds'
-            inputMode='numeric'
-            autoComplete='off'
-            onWheel={disableWheel}
-            onChange={setClockPart('seconds')}/>
-        </div>
-        <div className='button-container'>
-          <button type= "submit" className='time-button'>Begin</button>
-        </div>
-      </form>
-  </div>
-    )
+      )}
+    </div>
   )
 }

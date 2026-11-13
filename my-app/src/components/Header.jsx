@@ -1,31 +1,16 @@
 import { FaVolumeHigh } from "react-icons/fa6";
-import { FaPause, FaPlay } from "react-icons/fa6";
-import { GrPowerReset } from "react-icons/gr";
 import { IoVolumeMute } from "react-icons/io5";
-import "../App.css"
 
-export default function Header({ isRunning, isPause, setIsPause, isSoundOn, setIsSoundOn, setIsReset }) {
-
-  const handleVolumeClick = () => {
-    setIsSoundOn((prev) => !prev)
-  }
-  const handlePauseClick = () => {
-    setIsPause((prev) => !prev)
-  }
-
-  const handleResetClick = () => {
-    // A later Begin should start counting. Pause used to stay on after reset.
-    setIsPause(false)
-    setIsReset((prev) => !prev)
-  }
-
+export default function Header({ isSoundOn, setIsSoundOn }) {
   return (
-    <header className="header">
-      {isSoundOn ? <FaVolumeHigh className="sound" size={36} color="#3d2a22" onClick={handleVolumeClick}/>: 
-        <IoVolumeMute className='sound' size = {36} color='#3d2a22' onClick={handleVolumeClick}/>}
-      {isRunning && !isPause && <FaPause className='pause' size={34} color="#3d2a22" onClick={handlePauseClick}/>}
-      {isRunning && isPause && <FaPlay className='pause' size={34} color="#3d2a22" onClick={handlePauseClick}/>}
-      {isRunning && <GrPowerReset className='reset' size={32} color="#3d2a22" fontWeight={600} onClick={handleResetClick}/>}
-    </header>
+    <button
+      type="button"
+      className="sound-toggle"
+      aria-label={isSoundOn ? 'Mute sound' : 'Unmute sound'}
+      aria-pressed={isSoundOn}
+      onClick={() => setIsSoundOn((prev) => !prev)}
+    >
+      {isSoundOn ? <FaVolumeHigh size={18} /> : <IoVolumeMute size={18} />}
+    </button>
   )
 }

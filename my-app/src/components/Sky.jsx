@@ -2,69 +2,103 @@ import { useEffect, useState } from 'react'
 import { isNightHour } from '../utils/skyStage'
 
 const STARS = [
-  { top: '12%', left: '14%', size: 5, stage: 1, delay: '0s' },
-  { top: '22%', left: '78%', size: 7, stage: 1, delay: '1.2s' },
-  { top: '18%', left: '46%', size: 4, stage: 1, delay: '0.4s' },
-  { top: '34%', left: '28%', size: 6, stage: 1, delay: '2s' },
-  { top: '8%', left: '62%', size: 4, stage: 1, delay: '1.6s' },
-  { top: '40%', left: '84%', size: 5, stage: 2, delay: '0.8s' },
-  { top: '28%', left: '10%', size: 4, stage: 2, delay: '2.4s' },
-  { top: '48%', left: '58%', size: 6, stage: 2, delay: '0.2s' },
-  { top: '16%', left: '90%', size: 4, stage: 2, delay: '1.8s' },
-  { top: '56%', left: '22%', size: 5, stage: 2, delay: '3s' },
-  { top: '44%', left: '38%', size: 3, stage: 2, delay: '1s' },
-  { top: '30%', left: '66%', size: 4, stage: 2, delay: '2.2s' },
-  { top: '62%', left: '72%', size: 5, stage: 3, delay: '0.6s' },
-  { top: '70%', left: '12%', size: 4, stage: 3, delay: '1.4s' },
-  { top: '8%', left: '34%', size: 3, stage: 3, delay: '2.8s' },
-  { top: '52%', left: '92%', size: 6, stage: 3, delay: '0.3s' },
-  { top: '24%', left: '52%', size: 3, stage: 3, delay: '1.9s' },
-  { top: '66%', left: '48%', size: 4, stage: 3, delay: '2.6s' },
-  { top: '38%', left: '6%', size: 3, stage: 3, delay: '0.9s' },
-  { top: '74%', left: '86%', size: 5, stage: 3, delay: '1.5s' },
-  { top: '14%', left: '22%', size: 3, stage: 3, delay: '3.2s' },
-  { top: '58%', left: '34%', size: 4, stage: 3, delay: '2.1s' },
+  { top: '8%', left: '12%', size: 4, at: 0.06, delay: '0s' },
+  { top: '14%', left: '78%', size: 6, at: 0.12, delay: '1.1s' },
+  { top: '22%', left: '28%', size: 3, at: 0.18, delay: '0.4s' },
+  { top: '6%', left: '48%', size: 4, at: 0.26, delay: '1.8s' },
+  { top: '30%', left: '86%', size: 5, at: 0.33, delay: '0.7s' },
+  { top: '18%', left: '62%', size: 3, at: 0.4, delay: '2.2s' },
+  { top: '36%', left: '16%', size: 4, at: 0.47, delay: '1.4s' },
+  { top: '10%', left: '34%', size: 3, at: 0.54, delay: '0.2s' },
+  { top: '26%', left: '92%', size: 5, at: 0.61, delay: '2.6s' },
+  { top: '40%', left: '42%', size: 3, at: 0.68, delay: '1.6s' },
+  { top: '12%', left: '70%', size: 4, at: 0.74, delay: '0.9s' },
+  { top: '32%', left: '54%', size: 3, at: 0.8, delay: '2.1s' },
+  { top: '7%', left: '22%', size: 3, at: 0.86, delay: '1.3s' },
+  { top: '44%', left: '74%', size: 4, at: 0.92, delay: '0.5s' },
 ]
 
 const CLOUDS = [
-  { top: '18%', left: '12%', scale: 1, stage: 1, delay: '0s' },
-  { top: '30%', left: '68%', scale: 0.85, stage: 1, delay: '4s' },
-  { top: '14%', left: '42%', scale: 0.7, stage: 2, delay: '2s' },
-  { top: '42%', left: '24%', scale: 1.05, stage: 2, delay: '6s' },
-  { top: '22%', left: '82%', scale: 0.75, stage: 3, delay: '1s' },
-  { top: '50%', left: '58%', scale: 0.9, stage: 3, delay: '5s' },
+  { top: '12%', left: '8%', scale: 1, at: 0.05, delay: '0s', duration: '52s' },
+  { top: '22%', left: '62%', scale: 0.8, at: 0.2, delay: '3s', duration: '64s' },
+  { top: '8%', left: '38%', scale: 0.65, at: 0.38, delay: '1s', duration: '58s' },
+  { top: '30%', left: '24%', scale: 0.9, at: 0.55, delay: '5s', duration: '70s' },
+  { top: '16%', left: '80%', scale: 0.7, at: 0.74, delay: '2s', duration: '61s' },
 ]
 
-function Star({ star }) {
+function reveal(progress, at) {
+  return Math.max(0, Math.min(1, (progress - at) / 0.12))
+}
+
+function PixelMoon() {
   return (
-    <span
-      className="sky-star"
-      style={{
-        top: star.top,
-        left: star.left,
-        width: star.size,
-        height: star.size,
-        animationDelay: star.delay,
-      }}
-    />
+    <svg className="scene-pixel scene-pixel--moon" viewBox="0 0 16 16" aria-hidden="true">
+      <g fill="#FFF6E9">
+        <rect x="6" y="1" width="4" height="2" />
+        <rect x="4" y="3" width="4" height="2" />
+        <rect x="3" y="5" width="4" height="2" />
+        <rect x="2" y="7" width="4" height="2" />
+        <rect x="3" y="9" width="4" height="2" />
+        <rect x="4" y="11" width="4" height="2" />
+        <rect x="6" y="13" width="4" height="2" />
+      </g>
+    </svg>
   )
 }
 
-function Cloud({ cloud }) {
+function PixelSun() {
   return (
-    <span
-      className="sky-cloud"
-      style={{
-        top: cloud.top,
-        left: cloud.left,
-        transform: `scale(${cloud.scale})`,
-        animationDelay: cloud.delay,
-      }}
-    />
+    <svg className="scene-pixel scene-pixel--sun" viewBox="0 0 16 16" aria-hidden="true">
+      <g fill="#ECA994">
+        <rect x="7" y="1" width="2" height="2" />
+        <rect x="7" y="13" width="2" height="2" />
+        <rect x="1" y="7" width="2" height="2" />
+        <rect x="13" y="7" width="2" height="2" />
+        <rect x="3" y="3" width="2" height="2" />
+        <rect x="11" y="3" width="2" height="2" />
+        <rect x="3" y="11" width="2" height="2" />
+        <rect x="11" y="11" width="2" height="2" />
+      </g>
+      <g fill="#FFF6E9">
+        <rect x="5" y="5" width="6" height="6" />
+      </g>
+    </svg>
   )
 }
 
-export default function Sky({ stage = 0, phase = 'idle' }) {
+function PixelSprout({ progress }) {
+  return (
+    <svg className="scene-pixel scene-pixel--ground" viewBox="0 0 16 16" aria-hidden="true">
+      <g fill="#B8D6BE">
+        <rect x="7" y="10" width="2" height="4" opacity={reveal(progress, 0.16)} />
+        <rect x="4" y="8" width="3" height="2" opacity={reveal(progress, 0.34)} />
+        <rect x="9" y="7" width="3" height="2" opacity={reveal(progress, 0.52)} />
+        <rect x="6" y="5" width="2" height="2" opacity={reveal(progress, 0.7)} />
+      </g>
+      <g fill="#ECA994">
+        <rect x="5" y="14" width="6" height="2" opacity={reveal(progress, 0.08)} />
+      </g>
+    </svg>
+  )
+}
+
+function PixelWindow({ progress }) {
+  return (
+    <svg className="scene-pixel scene-pixel--ground" viewBox="0 0 16 16" aria-hidden="true">
+      <g fill="#3B302C">
+        <rect x="3" y="4" width="10" height="9" opacity={reveal(progress, 0.2)} />
+      </g>
+      <g fill="#FFF6E9">
+        <rect x="5" y="6" width="2" height="2" opacity={reveal(progress, 0.4)} />
+        <rect x="9" y="6" width="2" height="2" opacity={reveal(progress, 0.58)} />
+        <rect x="5" y="9" width="2" height="2" opacity={reveal(progress, 0.74)} />
+        <rect x="9" y="9" width="2" height="2" opacity={reveal(progress, 0.88)} />
+      </g>
+    </svg>
+  )
+}
+
+export default function Sky({ progress = 0, phase = 'idle' }) {
   const [night, setNight] = useState(() => isNightHour(new Date().getHours()))
 
   useEffect(() => {
@@ -73,39 +107,51 @@ export default function Sky({ stage = 0, phase = 'idle' }) {
     return () => clearInterval(id)
   }, [])
 
-  const sceneStage = Math.max(0, Math.min(3, stage))
   const scene = night ? 'night' : 'day'
+  const grown = Math.max(0, Math.min(1, progress))
 
   return (
     <div
-      className={`sky sky--${scene} sky--stage-${sceneStage}${phase === 'break' ? ' sky--break' : ''}`}
+      className={`sky sky--${scene}${phase === 'break' ? ' sky--break' : ''}`}
+      style={{ '--sky-progress': grown }}
       aria-hidden="true"
     >
-      {night ? (
-        <>
-          <span className="sky-moon">
-            <svg viewBox="0 0 64 64" aria-hidden="true">
-              <mask id="cozy-moon">
-                <rect width="64" height="64" fill="black" />
-                <circle cx="30" cy="32" r="20" fill="white" />
-                <circle cx="42" cy="26" r="16" fill="black" />
-              </mask>
-              <circle cx="30" cy="32" r="20" fill="#f6e7c1" mask="url(#cozy-moon)" />
-            </svg>
+      <span className="scene-haze" style={{ opacity: 0.15 + grown * 0.45 }} />
+      {night ? <PixelMoon /> : <PixelSun />}
+      {night ? <PixelWindow progress={grown} /> : <PixelSprout progress={grown} />}
+      <span className="scene-band" style={{ opacity: reveal(grown, 0.72) }} />
+      {night
+        ? STARS.map((star) => (
+          <span
+            key={`${star.top}-${star.left}`}
+            className="scene-star"
+            style={{
+              top: star.top,
+              left: star.left,
+              width: star.size,
+              height: star.size,
+              '--fade': reveal(grown, star.at),
+              animationDelay: star.delay,
+            }}
+          >
+            <i />
           </span>
-          {sceneStage >= 3 && <span className="sky-milky" />}
-          {STARS.filter((star) => star.stage <= sceneStage).map((star) => (
-            <Star key={`${star.top}-${star.left}`} star={star} />
-          ))}
-        </>
-      ) : (
-        <>
-          <span className="sky-sun" />
-          {CLOUDS.filter((cloud) => cloud.stage <= sceneStage).map((cloud) => (
-            <Cloud key={`${cloud.top}-${cloud.left}`} cloud={cloud} />
-          ))}
-        </>
-      )}
+        ))
+        : CLOUDS.map((cloud) => (
+          <span
+            key={`${cloud.top}-${cloud.left}`}
+            className="scene-cloud"
+            style={{
+              top: cloud.top,
+              left: cloud.left,
+              '--fade': reveal(grown, cloud.at),
+              animationDelay: cloud.delay,
+              animationDuration: cloud.duration,
+            }}
+          >
+            <i style={{ transform: `scale(${cloud.scale})` }} />
+          </span>
+        ))}
     </div>
   )
 }

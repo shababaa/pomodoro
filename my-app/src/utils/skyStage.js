@@ -4,10 +4,20 @@ export function isNightHour(hour) {
 }
 
 /**
- * How grown-in the sky is for the timer that was set.
- * The scene steps in thirds of that length: a 1 minute timer
- * updates every 20 seconds, a 15 minute timer every 5 minutes.
- * Stage 3 is the full scene, reached as that timer completes.
+ * Portion of the chosen focus length that has elapsed, from 0 to 1.
+ * The sky uses this so details can fade in across the session
+ * instead of waiting for three large jumps.
+ */
+export function skyProgress(elapsedMs, durationMs) {
+  const elapsed = Math.max(0, Number(elapsedMs) || 0)
+  const duration = Math.max(0, Number(durationMs) || 0)
+  if (!(duration > 0) || !(elapsed > 0)) return 0
+  return Math.min(1, elapsed / duration)
+}
+
+/**
+ * Coarse stage kept for the older third-based checks.
+ * The painted sky follows skyProgress.
  */
 export function skyStage(elapsedMs, durationMs) {
   const elapsed = Math.floor(elapsedMs)

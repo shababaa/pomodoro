@@ -2,6 +2,33 @@ import { useState, useRef, useEffect } from 'react'
 import { FaTrashCan, FaChevronDown, FaChevronUp } from 'react-icons/fa6'
 import { formatDistanceToNow } from 'date-fns'
 
+const PIXEL_ICONS = {
+    book: [[2,3,10,11],[3,4,8,2],[3,7,8,2],[3,10,8,2]],
+    leaf: [[7,2,2,4],[5,5,6,3],[4,8,3,3],[8,8,3,2],[7,11,2,3]],
+    moon: [[6,2,4,2],[5,4,3,8],[6,12,4,2]],
+    mug: [[3,4,8,7],[4,5,6,4],[11,5,2,3],[4,12,6,2]],
+    star: [[7,2,2,3],[5,5,6,2],[4,7,8,2],[6,9,4,3],[5,12,2,2],[9,12,2,2]],
+}
+
+function iconKind(name) {
+    const kinds = Object.keys(PIXEL_ICONS)
+    let hash = 0
+    const label = name || ''
+    for (let i = 0; i < label.length; i += 1) hash = (hash + label.charCodeAt(i)) % kinds.length
+    return kinds[hash]
+}
+
+function PixelIcon({ name }) {
+    const rects = PIXEL_ICONS[iconKind(name)]
+    return (
+        <svg className="pixel-icon" viewBox="0 0 16 16" aria-hidden="true">
+            {rects.map(([x, y, w, h]) => (
+                <rect key={`${x}-${y}`} x={x} y={y} width={w} height={h} />
+            ))}
+        </svg>
+    )
+}
+
 export default function Projects({ apiBase, onProjectSelect, selectedProjectId, activeSessionProjectId, refreshTrigger }) {
     const [showInput, setShowInput] = useState(false)
     const [projectName, setProjectName] = useState('')
@@ -16,7 +43,6 @@ export default function Projects({ apiBase, onProjectSelect, selectedProjectId, 
     const prevProjectsRef = useRef([])
     const newProjectIdsRef = useRef(new Set())
     const isInitialLoadRef = useRef(true)
-    const [hoveredProjectId, setHoveredProjectId] = useState(null)
 
     async function getProjects(){
         const res = await fetch(`${apiBase}/projects`, {
@@ -65,22 +91,31 @@ export default function Projects({ apiBase, onProjectSelect, selectedProjectId, 
     }, [refreshTrigger, activeSessionProjectId, apiBase])
 
     useEffect(() => {
-        getProjects().then(data => {
+        let cancelled = false
+        getProjects().then(async (data) => {
+            const list = Array.isArray(data) ? data : []
             if (isInitialLoadRef.current) {
-                // On initial load, animate all projects
-                newProjectIdsRef.current = new Set(data.map(p => p.projectId))
+                newProjectIdsRef.current = new Set(list.map(p => p.projectId))
                 isInitialLoadRef.current = false
             } else {
-                // On subsequent loads, find the new project by comparing with previous
                 const prevIds = new Set(prevProjectsRef.current.map(p => p.projectId))
                 newProjectIdsRef.current = new Set(
-                    data.filter(p => !prevIds.has(p.projectId)).map(p => p.projectId)
+                    list.filter(p => !prevIds.has(p.projectId)).map(p => p.projectId)
                 )
             }
-            prevProjectsRef.current = data
-            setProjects(data)
+            prevProjectsRef.current = list
+            setProjects(list)
+            const pairs = await Promise.all(list.map(async (project) => {
+                try {
+                    const sessions = await getSessions(project.projectId)
+                    return [project.projectId, Array.isArray(sessions) ? sessions : []]
+                } catch {
+                    return [project.projectId, []]
+                }
+            }))
+            if (!cancelled) setSessionsByProject(Object.fromEntries(pairs))
         })
-
+        return () => { cancelled = true }
     }, [updateProjects])
 
     useEffect(() => {
@@ -170,6 +205,14 @@ export default function Projects({ apiBase, onProjectSelect, selectedProjectId, 
         }
     }
 
+    function projectSummary(projectId) {
+        const list = sessionsByProject[projectId] || []
+        if (!list.length) return 'No sessions yet'
+        const total = list.reduce((sum, session) => sum + (Number(session.duration_seconds) || 0), 0)
+        const count = `${list.length} ${list.length === 1 ? 'session' : 'sessions'}`
+        return `${formatDuration(total)} · ${count}`
+    }
+
     function formatBreakDuration(seconds) {
         if (seconds >= 3600) {
             const hours = Math.round(seconds / 3600)
@@ -212,7 +255,10 @@ export default function Projects({ apiBase, onProjectSelect, selectedProjectId, 
               >
                 {isExpanded ? <FaChevronUp /> : <FaChevronDown />}
               </button>
-              <h3 className='projects-sidebar__title'>Projects</h3>
+              <div className="journal-heading">
+                <h3 className='projects-sidebar__title'>Projects</h3>
+                <p className="journal-kicker">A small record of what you finish</p>
+              </div>
               {!showInput ? (
                 <button
                   type='button'
@@ -242,41 +288,37 @@ export default function Projects({ apiBase, onProjectSelect, selectedProjectId, 
             {projects.length === 0 ? (
                 <p className="projects-sidebar__empty">No projects yet</p>
             ) : (
-                <ul className='projects-list'>
+                <ul className='projects-list journal-list'>
                 {projects.map((obj) => (
-                    <div 
-                        className={`project-line ${newProjectIdsRef.current.has(obj.projectId) ? 'project-line--new' : ''}`}
+                    <li
+                        className={`journal-card ${selectedProjectId === obj.projectId ? 'is-selected' : ''} ${newProjectIdsRef.current.has(obj.projectId) ? 'project-line--new' : ''}`}
                         key={obj.projectId}
                         onAnimationEnd={() => {
                             newProjectIdsRef.current.delete(obj.projectId)
                         }}
                     >
-                        <div
-                            className='project-line__header'
-                            onMouseEnter={() => setHoveredProjectId(obj.projectId)}
-                            onMouseLeave={() => setHoveredProjectId(null)}
+                        <button
+                            type="button"
+                            className="journal-card__main"
+                            onClick={() => {
+                                setOpenProjectId(prev => prev === obj.projectId ? null : obj.projectId)
+                                if (onProjectSelect) onProjectSelect(obj.projectId)
+                            }}
                         >
-                            <li 
-                                onClick={(e) => {
-                                    e.stopPropagation()
-                                    // Toggle dropdown
-                                    setOpenProjectId(prev => prev === obj.projectId ? null : obj.projectId)
-                                    // Select project for timer
-                                    if (onProjectSelect) {
-                                        onProjectSelect(obj.projectId)
-                                    }
-                                }}
-                                style={{ cursor: 'pointer' }}
-                                className={selectedProjectId === obj.projectId ? 'project-name--selected' : ''}
-                            >
-                                {obj.name}
-                            </li>
-                            {hoveredProjectId === obj.projectId && (
-                                <FaTrashCan className='trash-icon' onClick={(e) => handleDelete(e, obj.projectId)}/>
-                            )}
-                            
-                        </div>
-                        
+                            <PixelIcon name={obj.name} />
+                            <span className="journal-card__copy">
+                                <span className="journal-card__name">{obj.name}</span>
+                                <span className="journal-card__meta">{projectSummary(obj.projectId)}</span>
+                            </span>
+                        </button>
+                        <button
+                            type="button"
+                            className="journal-card__delete"
+                            aria-label={`Delete ${obj.name}`}
+                            onClick={(e) => handleDelete(e, obj.projectId)}
+                        >
+                            <FaTrashCan />
+                        </button>
                         {openProjectId === obj.projectId && (
                             <ul className='sessions-list'>
                                 {activeSessionProjectId === obj.projectId && (
@@ -286,13 +328,12 @@ export default function Projects({ apiBase, onProjectSelect, selectedProjectId, 
                                 )}
                                 {(sessionsByProject[obj.projectId] || []).map(s => (
                                     <li key={s.sessionId}>
-                                       {formatDuration(s.duration_seconds)} • {formatDistanceToNow(new Date(s.session_date), { addSuffix: true})} • {formatBreakDuration(s.total_break || 0)} break
+                                       {formatDuration(s.duration_seconds)} · {formatDistanceToNow(new Date(s.session_date), { addSuffix: true })} · {formatBreakDuration(s.total_break || 0)} break
                                     </li>
                                 ))}
                             </ul>
                         )}
-                        
-                    </div>
+                    </li>
                 ))}
                 </ul>
             )}
